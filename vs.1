@@ -1,0 +1,42 @@
+.TH vs 1 "May 16, 2013" "OpenMandriva" "Developer Tools"
+.SH NAME
+vs \- simple RPM spec file editor
+.SH SYNOPSIS
+.br
+.B vs
+<app>
+.SH DESCRIPTION
+\fBvs\fR ("vi specfile") is a simple generator for RPM spec files (the
+files controlling the build process of RPM packages).
+.PP
+\fBvs\fR creates a spec file template, and invokes an editor (usually
+\fBvim\fR, but \fBvs\fR respects the \fBEDITOR\fR and \fBVISUAL\fR environment
+variables) to edit the file.
+.PP
+All you need to do is fill in the blanks and possibly overwrite some default
+settings.
+.PP
+If you are trying to package a library, \fBvl (1)\fR is preferrable over
+\fBvs\fR. If you are packaging a perl module, use \fBvp (1)\fR. If you are
+packaging a Java library, use \fBvj (1)\fR.
+.SH EXAMPLE
+.SP
+.NF
+  $ vs myfavoriteapp
+.br
+  $ cd ~/rpmbuild/SPECS
+.br
+  $ rpm -ba myfavoriteapp.spec
+.FI
+.PD
+.SH "SEE ALSO"
+.BR rpm (8),
+.BR vl (1),
+.BR vj (1),
+.BR vp (1),
+.BR e (1)
+
+.SH AUTHOR
+.nf
+Bernhard Rosenkraenzer <bero@lindev.ch>
+.fi

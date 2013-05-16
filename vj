@@ -1,0 +1,59 @@
+#!/bin/bash
+# Spec file generator for Java packages
+# (c) 2005-2013 Bernhard Rosenkraenzer <bero@lindev.ch>
+
+NAME=`echo $1 |sed -e "s/\.spec$//"`
+if [ -z "$EDITOR" ]; then
+	if [ -e /usr/bin/vim ]; then
+		EDITOR=/usr/bin/vim
+	else
+		EDITOR=/bin/vi
+	fi
+fi
+ID="`cat /etc/passwd |grep "^$(id -un):" |cut -d: -f5` <`id -un`@`hostname |cut -d. -f2-`>"
+[ -e ~/.vs ] && source ~/.vs
+
+cd /usr/src/ark/SPECS
+if [ ! -e $NAME.spec ]; then
+	cat >$NAME.spec <<EOF
+Name: $NAME
+Version:
+Release: 1
+Summary:
+URL: http://$NAME.sf.net/
+Source: %name-%version.tar.bz2
+License: ASF 2.0
+Group: Libraries/Java
+BuildRequires: java-1.6.0-openjdk-devel
+BuildArch: noarch
+
+%description
+
+%package        javadoc
+Summary:        Javadoc for %{name}
+Group:          Libraries/Java
+Requires: %name = %version-%release
+
+%description    javadoc
+Javadoc for %{name}.
+
+%prep
+%setup
+
+%build
+ant dist
+
+%install
+mkdir -p \$RPM_BUILD_ROOT%_javadir
+install -c -m 644 *.jar \$RPM_BUILD_ROOT%_javadir
+install -d -m 755 \$RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
+cp -pr docs/api/* \$RPM_BUILD_ROOT%{_javadocdir}/%{name}-%{version}
+
+%files
+%_javadir/*
+
+%files javadoc
+%_javadocdir/%name-%version
+EOF
+fi
+exec $EDITOR "$NAME".spec

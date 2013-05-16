@@ -1,0 +1,38 @@
+.TH vs 1 "May 16, 2013" "Ark Linux" "Developer Tools"
+.SH NAME
+vp \- simple RPM spec file editor for perl modules
+.SH SYNOPSIS
+.br
+.B vs
+<app>
+.SH DESCRIPTION
+\fBvp\fR is a simple generator for RPM spec files (the files controlling the
+build process of RPM packages) for perl modules.
+.PP
+\fBvp\fR creates a spec file template, and invokes an editor (usually
+\fBvim\fR, but \fBvs\fR respects the \fBEDITOR\fR and \fBVISUAL\fR environment
+variables) to edit the file.
+.PP
+All you need to do is fill in the blanks and possibly overwrite some default
+settings.
+.SH EXAMPLE
+.SP
+.NF
+  $ vp perl-somemodule
+.br
+  $ cd ~/rpmbuild/SPECS
+.br
+  $ rpm -ba perl-somemodule.spec
+.FI
+.PD
+.SH "SEE ALSO"
+.BR rpm (8),
+.BR vs (1),
+.BR vl (1),
+.BR vj (1),
+.BR e (1)
+
+.SH AUTHOR
+.nf
+Bernhard Rosenkraenzer <bero@lindev.ch>
+.fi

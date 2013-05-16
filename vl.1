@@ -1,0 +1,46 @@
+.TH vl 1 "May 16, 2013" "OpenMandriva" "Developer Tools"
+.SH NAME
+vs \- simple RPM spec file editor for libraries
+.SH SYNOPSIS
+.br
+.B vl
+<app>
+.SH DESCRIPTION
+\fBvl\fR is a simple generator for RPM spec files (the files controlling the
+build process of RPM packages) for libraries.
+.PP
+\fBvl\fR creates a spec file template, and invokes an editor (usually
+\fBvim\fR, but \fBvl\fR respects the \fBEDITOR\fR and \fBVISUAL\fR environment
+variables) to edit the file.
+.PP
+All you need to do is fill in the blanks and possibly overwrite some default
+settings.
+.PP
+If you are trying to package an application, \fBvs (1)\fR is probably
+preferrable over \fBvl\fR.
+.PP
+The difference between \fBvs\fR and \fBvl\fR is that \fBvl\fR tries to take
+care of -devel and -static subpackages for development related files, and that
+\fBvl\fR pre-fills the Group: header (virtually all libraries should be in
+System Environment/Libraries).
+.SH EXAMPLE
+.SP
+.NF
+  $ vl myfavoritelib
+.br
+  $ cd ~/rpmbuild/SPECS
+.br
+  $ rpm -ba myfavoritelib.spec
+.FI
+.PD
+.SH "SEE ALSO"
+.BR rpm (8),
+.BR vs (1),
+.BR vj (1),
+.BR vp (1),
+.BR e (1)
+
+.SH AUTHOR
+.nf
+Bernhard Rosenkraenzer <bero@lindev.ch>
+.fi

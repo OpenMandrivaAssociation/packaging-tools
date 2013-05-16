@@ -1,0 +1,41 @@
+.TH vl 1 "May 16, 2013" "OpenMandriva" "Developer Tools"
+.SH NAME
+vj \- simple RPM spec file editor for Java libraries
+.SH SYNOPSIS
+.br
+.B vj
+<app>
+.SH DESCRIPTION
+\fBvj\fR is a simple generator for RPM spec files (the files controlling the
+build process of RPM packages) for Java libraries.
+.PP
+\fBvj\fR creates a spec file template, and invokes an editor (usually
+\fBvim\fR, but \fBvs\fR respects the \fBEDITOR\fR and \fBVISUAL\fR environment
+variables) to edit the file.
+.PP
+All you need to do is fill in the blanks and possibly overwrite some default
+settings.
+.PP
+If you are trying to package something not related to Java, \fBvs (1)\fR and
+\fBvl\fR are preferrable over \fBvj\fR.
+.SH EXAMPLE
+.SP
+.NF
+  $ vj myfavoritejavalib
+.br
+  $ cd ~/rpmbuild/SPECS
+.br
+  $ rpm -ba myfavoritejavalib.spec
+.FI
+.PD
+.SH "SEE ALSO"
+.BR rpm (8),
+.BR vs (1),
+.BR vl (1),
+.BR vp (1),
+.BR e (1)
+
+.SH AUTHOR
+.nf
+Bernhard Rosenkraenzer <bero@lindev.ch>
+.fi

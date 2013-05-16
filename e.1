@@ -1,0 +1,44 @@
+.TH e 1 "May 16, 2013" "OpenMandriva" "Developer Tools"
+.SH NAME
+e \- gendiff (1) friendly editor wrapper
+.SH SYNOPSIS
+.br
+.B e
+[ -s suffix ] <file>
+.SH OPTIONS
+.TP
+\fB-s\fR suffix
+Suffix to be used. If -s is not specified, \fBe\fR uses .omv~
+.SH DESCRIPTION
+\fBe\fR is a rather simple shell script which aids in generating and updating
+diff files.
+.PP
+It is an add-on to the \fBgendiff(1)\fR script. It is strongly recommended that
+you understand what gendiff does before using \fBe\fR.
+.PP
+\fBe\fR creates a gendiff style backup of a file if necessary, then invokes
+an editor (usually \fBvim\fR, but \fBe\fR respects the \fBEDITOR\fR environment
+variable) to edit the file.
+.SH EXAMPLE
+.SP
+.NF
+  $ cd someapp-1.2.3
+.br
+  $ e test.c
+.br
+  $ cd ..
+.br
+  $ gendiff someapp-1.2.3 .omv~ >my.patch
+.PP
+Now my.patch will contain your changes to test.c
+.FI
+.PD
+.SH "SEE ALSO"
+.BR gendiff (1),
+.BR diff (1),
+.BR patch (1)
+
+.SH AUTHOR
+.nf
+Bernhard Rosenkraenzer <bero@lindev.ch>
+.fi
