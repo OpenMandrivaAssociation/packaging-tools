@@ -22,34 +22,35 @@ Name: perl-%{module}
 Version:
 Release: 1
 Summary:
-URL: http://search.cpan.org/dist/%module
-Source: http://mirror.switch.ch/ftp/mirror/CPAN/authors/id/X/XX/XXX/%module/%{module}-%version.tar.gz
+URL: http://search.cpan.org/dist/%{module}
+Source: http://mirror.switch.ch/ftp/mirror/CPAN/authors/id/X/XX/XXX/%module/%{module}-%{version}.tar.gz
 License: Perl (Artistic or GPL)
 Group: Development/Languages
 BuildArch: noarch
 
 %track
-prog %name = {
-	url = http://search.cpan.org/dist/%module
-	regex = "%module-(__VER__)"
-	version = %version
+prog %{name} = {
+	url = http://search.cpan.org/dist/%{module}
+	regex = "%{module}-(__VER__)"
+	version = %{version}
 }
 
 %description
 
 %prep
-%setup -q -n %{module}-%version
+%setup -q -n %{module}-%{version}
 
 %build
 %{__perl} Makefile.PL INSTALLDIRS=vendor
 %make
-make %?_smp_mflags test
+
+%check
+make test
 
 %install
 %makeinstall_std INSTALLDIRS=vendor
 
 %files
-%defattr(-,root,root)
 %doc Changes MANIFEST README
 %{perl_vendorlib}/*/*
 EOF

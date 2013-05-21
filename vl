@@ -17,29 +17,29 @@ cd ~/rpmbuild/SPECS
 if [ ! -e $NAME.spec ]; then
 	cat >$NAME.spec <<EOF
 %define major 0
-%define beta %nil
-%define scmrev %nil
-%define libname %mklibname ${NAME/lib/} %major
+%define beta %{nil}
+%define scmrev %{nil}
+%define libname %mklibname ${NAME/lib/} %{major}
 %define devname %mklibname ${NAME/lib/} -d
 %define staticname %mklibname ${NAME/lib/} -d -s
 
 Name: $NAME
 Version:
-%if "%beta" == ""
-%if "%scmrev" == ""
-Release: 1ark
-Source: %name-%version.tar.bz2
+%if "%{beta}" == ""
+%if "%{scmrev}" == ""
+Release: 1
+Source: %{name}-%{version}.tar.bz2
 %else
-Release: 0.%scmrev.1ark
-Source: %name-%scmrev.tar.xz
+Release: 0.%{scmrev}.1
+Source: %{name}-%{scmrev}.tar.xz
 %endif
 %else
-%if "%scmrev" == ""
-Release: 0.%beta.1ark
-Source: %name-%version%beta.tar.bz2
+%if "%{scmrev}" == ""
+Release: 0.%{beta}.1
+Source: %{name}-%{version}%{beta}.tar.bz2
 %else
-Release: 0.%beta.%scmrev.1ark
-Source: %name-%scmrev.tar.xz
+Release: 0.%{beta}.%{scmrev}.1
+Source: %{name}-%{scmrev}.tar.xz
 %endif
 %endif
 Summary:
@@ -48,45 +48,45 @@ License: GPL
 Group: System/Libraries
 
 %track
-prog %name = {
+prog %{name} = {
 	url = http://
 	regex = "version (__VER__)"
-	version = %version
+	version = %{version}
 }
 
 %description
 
-%package -n %libname
+%package -n %{libname}
 Summary:
 Group: System/Libraries
 
-%description -n %libname
+%description -n %{libname}
 
-%package -n %devname
-Summary: Development files for %name
+%package -n %{devname}
+Summary: Development files for %{name}
 Group: Development/C
-Requires: %libname = %EVRD
+Requires: %{libname} = %{EVRD}
 
-%description -n %devname
-Development files (Headers etc.) for %name.
+%description -n %{devname}
+Development files (Headers etc.) for %{name}.
 
-%package -n %staticname
-Summary: Static libraries for linking to %name
+%package -n %{staticname}
+Summary: Static libraries for linking to %{name}
 Group: Development/C
-Requires: %devname = %EVRD
+Requires: %{devname} = %{EVRD}
 
-%description -n %staticname
-Static libraries for linking to %name.
+%description -n %{staticname}
+Static libraries for linking to %{name}.
 
 Install this package if you wish to develop or compile applications using
-%name statically (users of the resulting binary won't need %name installed
+%{name} statically (users of the resulting binary won't need %{name} installed
 with static linking).
 
 %prep
-%if "%scmrev" == ""
-%setup -q -n %name-%version%beta
+%if "%{scmrev}" == ""
+%setup -q -n %{name}-%{version}%{beta}
 %else
-%setup -q -n %name
+%setup -q -n %{name}
 %endif
 %configure
 
@@ -97,18 +97,18 @@ with static linking).
 %makeinstall_std
 
 %files
-%_bindir/*
+%{_bindir}/*
 
-%files -n %libname
-%_libdir/*.so.%major*
+%files -n %{libname}
+%{_libdir}/*.so.%{major}*
 
-%files -n %devname
-%_includedir/*
-%_libdir/*.so
-%_libdir/pkgconfig/*
+%files -n %{devname}
+%{_includedir}/*
+%{_libdir}/*.so
+%{_libdir}/pkgconfig/*
 
-%files -n %staticname
-%_libdir/*.a
+%files -n %{staticname}
+%{_libdir}/*.a
 EOF
 fi
 exec $EDITOR "$NAME".spec

@@ -13,26 +13,26 @@ ID="`cat /etc/passwd |grep "^$(id -un):" |cut -d: -f5` <`id -un`@`hostname |cut 
 
 if [ ! -e ~/rpmbuild/SPECS/$NAME.spec ]; then
 	cat >~/rpmbuild/SPECS/$NAME.spec <<EOF
-%define beta %nil
-%define scmrev %nil
+%define beta %{nil}
+%define scmrev %{nil}
 
 Name: $NAME
 Version:
-%if "%beta" == ""
-%if "%scmrev" == ""
-Release: 1ark
-Source: %name-%version.tar.bz2
+%if "%{beta}" == ""
+%if "%{scmrev}" == ""
+Release: 1
+Source: %{name}-%{version}.tar.bz2
 %else
-Release: 0.%scmrev.1
-Source: %name-%scmrev.tar.xz
+Release: 0.%{scmrev}.1
+Source: %{name}-%{scmrev}.tar.xz
 %endif
 %else
-%if "%scmrev" == ""
-Release: 0.%beta.1
-Source: %name-%version%beta.tar.bz2
+%if "%{scmrev}" == ""
+Release: 0.%{beta}.1
+Source: %{name}-%{version}%{beta}.tar.bz2
 %else
-Release: 0.%beta.0.%scmrev.1
-Source: %name-%scmrev.tar.xz
+Release: 0.%{beta}.0.%{scmrev}.1
+Source: %{name}-%{scmrev}.tar.xz
 %endif
 %endif
 Summary:
@@ -41,19 +41,19 @@ License: GPL
 Group:
 
 %track
-prog %name = {
+prog %{name} = {
 	url = http://
 	regex = "version (__VER__)"
-	version = %version
+	version = %{version}
 }
 
 %description
 
 %prep
-%if "%scmrev" == ""
-%setup -q -n %name-%version%beta
+%if "%{scmrev}" == ""
+%setup -q -n %{name}-%{version}%{beta}
 %else
-%setup -q -n %name
+%setup -q -n %{name}
 %endif
 %configure
 
@@ -64,7 +64,6 @@ prog %name = {
 %makeinstall_std
 
 %files
-%defattr(-,root,root)
 # Leaving the "/" in here is _BAD_, but will generally work [packaging all
 # files] for testing.
 # Please replace it with an actual file list to prevent your package from

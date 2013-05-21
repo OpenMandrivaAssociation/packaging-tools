@@ -1,6 +1,6 @@
 Name: packaging-tools
 Version: 1.0
-Release: 1
+Release: 3
 Source0: e
 Source1: e.1
 Source2: vs
@@ -25,10 +25,10 @@ Some tools that make packagers' lives easier
 %build
 
 %install
-mkdir -p %buildroot%_bindir %buildroot%_mandir/man1
-install -c -m 755 %SOURCE0 %SOURCE2 %SOURCE4 %SOURCE6 %SOURCE8 %buildroot%_bindir/
-install -c -m 644 %SOURCE1 %SOURCE3 %SOURCE5 %SOURCE7 %SOURCE9 %buildroot%_mandir/man1/
+mkdir -p %{buildroot}%{_bindir} %{buildroot}%{_mandir}/man1
+install -c -m 755 %SOURCE0 %SOURCE2 %SOURCE4 %SOURCE6 %SOURCE8 %{buildroot}%{_bindir}/
+install -c -m 644 %SOURCE1 %SOURCE3 %SOURCE5 %SOURCE7 %SOURCE9 %{buildroot}%{_mandir}/man1/
 
 %files
-%_bindir/*
-%_mandir/man1/*
+%{_bindir}/*
+%{_mandir}/man1/*
