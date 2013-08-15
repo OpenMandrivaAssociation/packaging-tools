@@ -1,21 +1,21 @@
-Name: packaging-tools
-Version: 1.0
-Release: 3
-Source0: e
-Source1: e.1
-Source2: vs
-Source3: vs.1
-Source4: vl
-Source5: vl.1
-Source6: vj
-Source7: vj.1
-Source8: vp
-Source9: vp.1
-Summary: Tools that make packagers' lives easier
-URL: http://openmandriva.org/
-License: Public Domain
-Group: Development/Other
-BuildArch: noarch
+Summary:	Tools that make packagers' lives easier
+Name:		packaging-tools
+Version:	1.0
+Release:	3
+License:	Public Domain
+Group:		Development/Other
+Url:		http://openmandriva.org/
+Source0:	e
+Source1:	e.1
+Source2:	vs
+Source3:	vs.1
+Source4:	vl
+Source5:	vl.1
+Source6:	vj
+Source7:	vj.1
+Source8:	vp
+Source9:	vp.1
+BuildArch:	noarch
 
 %description
 Some tools that make packagers' lives easier
@@ -32,3 +32,4 @@ install -c -m 644 %SOURCE1 %SOURCE3 %SOURCE5 %SOURCE7 %SOURCE9 %{buildroot}%{_ma
 %files
 %{_bindir}/*
 %{_mandir}/man1/*
+
