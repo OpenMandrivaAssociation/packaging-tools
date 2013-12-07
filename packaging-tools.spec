@@ -1,7 +1,7 @@
 Summary:	Tools that make packagers' lives easier
 Name:		packaging-tools
 Version:	1.0
-Release:	3
+Release:	4
 License:	Public Domain
 Group:		Development/Other
 Url:		http://openmandriva.org/
