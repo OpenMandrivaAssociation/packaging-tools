@@ -1,4 +1,11 @@
 #!/bin/bash
+
+SNAPSHOT=false
+if [ "$1" = "-s" -o "$1" = "--snapshot" ]; then
+	shift
+	SNAPSHOT=true
+fi
+
 NAME=`echo $1 |sed -e "s/\.spec$//"`
 [ -z "$EDITOR" ] && EDITOR="$VISUAL"
 if [ -z "$EDITOR" ]; then
@@ -12,29 +19,45 @@ ID="`cat /etc/passwd |grep "^$(id -un):" |cut -d: -f5` <`id -un`@`hostname |cut 
 [ -e ~/.vs ] && source ~/.vs
 
 if [ ! -e ~/rpmbuild/SPECS/$NAME.spec ]; then
+	if $SNAPSHOT; then
 	cat >~/rpmbuild/SPECS/$NAME.spec <<EOF
 %define beta %{nil}
 %define scmrev %{nil}
 
+EOF
+	cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
 Name: $NAME
 Version:
+EOF
+
+	if $SNAPSHOT; then
+		cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
 %if "%{beta}" == ""
 %if "%{scmrev}" == ""
 Release: 1
-Source: %{name}-%{version}.tar.bz2
+Source0: %{name}-%{version}.tar.bz2
 %else
 Release: 0.%{scmrev}.1
-Source: %{name}-%{scmrev}.tar.xz
+Source0: %{name}-%{scmrev}.tar.xz
 %endif
 %else
 %if "%{scmrev}" == ""
 Release: 0.%{beta}.1
-Source: %{name}-%{version}%{beta}.tar.bz2
+Source0: %{name}-%{version}%{beta}.tar.bz2
 %else
 Release: 0.%{beta}.0.%{scmrev}.1
-Source: %{name}-%{scmrev}.tar.xz
+Source0: %{name}-%{scmrev}.tar.xz
 %endif
 %endif
+EOF
+	else
+		cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
+Release: 1
+Source0: %{name}-%{varsion}.tar.xz
+EOF
+	fi
+
+	cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
 Summary:
 URL: http://$NAME.sf.net/
 License: GPL

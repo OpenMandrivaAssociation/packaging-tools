@@ -4,7 +4,15 @@ vs \- simple RPM spec file editor for libraries
 .SH SYNOPSIS
 .br
 .B vl
+[-s|--snapshot] [-S|--static]
 <app>
+.SH OPTIONS
+.TP
+.BI \-s\fR,\ \fB\-\-snapshot
+Create constructs to allow building an SCM snapshot
+.TP
+.BI \-S\fR,\ \fB\-\-static
+Create subpackage for a static library
 .SH DESCRIPTION
 \fBvl\fR is a simple generator for RPM spec files (the files controlling the
 build process of RPM packages) for libraries.

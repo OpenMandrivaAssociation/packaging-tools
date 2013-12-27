@@ -2,6 +2,26 @@
 # Spec file generator for libraries
 # (c) 2000-2013 Bernhard Rosenkraenzer <bero@lindev.ch>
 
+STATIC=false
+SNAPSHOT=false
+for i in "$@"; do
+	if [ "`echo $i |cut -b1`" = "-" ]; then
+		case $i in
+		-s|--snapshot)
+			SNAPSHOT=true
+			;;
+		-S|--static)
+			STATIC=true
+			;;
+		esac
+		shift
+	fi
+done
+
+if [ -z "$1" ]; then
+	exit 1
+fi
+
 NAME=`echo $1 |sed -e "s/\.spec$//"`
 if [ -z "$EDITOR" ]; then
 	if [ -e /usr/bin/vim ]; then
@@ -17,14 +37,31 @@ cd ~/rpmbuild/SPECS
 if [ ! -e $NAME.spec ]; then
 	cat >$NAME.spec <<EOF
 %define major 0
+EOF
+	if $SNAPSHOT; then
+		cat >>$NAME.spec <<EOF
 %define beta %{nil}
 %define scmrev %{nil}
+EOF
+	fi
+	cat >>$NAME.spec <<EOF
 %define libname %mklibname ${NAME/lib/} %{major}
 %define devname %mklibname ${NAME/lib/} -d
+EOF
+	if $STATIC; then
+		cat >>$NAME.spec <<EOF
 %define staticname %mklibname ${NAME/lib/} -d -s
+EOF
+	fi
+
+	cat >>$NAME.spec <<EOF
 
 Name: $NAME
 Version:
+EOF
+
+	if $SNAPSHOT; then
+		cat >>$NAME.spec <<EOF
 %if "%{beta}" == ""
 %if "%{scmrev}" == ""
 Release: 1
@@ -42,6 +79,15 @@ Release: 0.%{beta}.%{scmrev}.1
 Source: %{name}-%{scmrev}.tar.xz
 %endif
 %endif
+EOF
+	else
+		cat >>$NAME.spec <<EOF
+Release: 1
+Source0: %{name}-%{version}.tar.xz
+EOF
+	fi
+
+	cat >>$NAME.spec <<EOF
 Summary:
 URL: http://$NAME.sf.net/
 License: GPL
@@ -69,6 +115,10 @@ Requires: %{libname} = %{EVRD}
 
 %description -n %{devname}
 Development files (Headers etc.) for %{name}.
+EOF
+
+	if $STATIC; then
+		cat >>$NAME.spec <<EOF
 
 %package -n %{staticname}
 Summary: Static libraries for linking to %{name}
@@ -81,13 +131,29 @@ Static libraries for linking to %{name}.
 Install this package if you wish to develop or compile applications using
 %{name} statically (users of the resulting binary won't need %{name} installed
 with static linking).
+EOF
+	fi
+
+	cat >>$NAME.spec <<EOF
 
 %prep
+EOF
+
+	if $SNAPSHOT; then
+		cat >>$NAME.spec <<EOF
 %if "%{scmrev}" == ""
 %setup -q -n %{name}-%{version}%{beta}
 %else
 %setup -q -n %{name}
 %endif
+EOF
+	else
+		cat >>$NAME.spec <<EOF
+%setup -q
+EOF
+	fi
+
+	cat >>$NAME.spec <<EOF
 %configure
 
 %build
@@ -106,9 +172,14 @@ with static linking).
 %{_includedir}/*
 %{_libdir}/*.so
 %{_libdir}/pkgconfig/*
+EOF
+
+	if $STATIC; then
+		cat >>$NAME.spec <<EOF
 
 %files -n %{staticname}
 %{_libdir}/*.a
 EOF
+	fi
 fi
 exec $EDITOR "$NAME".spec
