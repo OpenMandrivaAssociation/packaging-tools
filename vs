@@ -20,11 +20,12 @@ ID="`cat /etc/passwd |grep "^$(id -un):" |cut -d: -f5` <`id -un`@`hostname |cut 
 
 if [ ! -e ~/rpmbuild/SPECS/$NAME.spec ]; then
 	if $SNAPSHOT; then
-	cat >~/rpmbuild/SPECS/$NAME.spec <<EOF
+		cat >~/rpmbuild/SPECS/$NAME.spec <<EOF
 %define beta %{nil}
 %define scmrev %{nil}
 
 EOF
+	fi
 	cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
 Name: $NAME
 Version:
@@ -73,11 +74,20 @@ prog %{name} = {
 %description
 
 %prep
+EOF
+
+	if $SNAPSHOT; then
+		cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
 %if "%{scmrev}" == ""
 %setup -q -n %{name}-%{version}%{beta}
 %else
 %setup -q -n %{name}
 %endif
+EOF
+	else
+		echo '%setup -q' >>~/rpmbuild/SPECS/$NAME.spec
+	fi
+	cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
 %configure
 
 %build
