@@ -4,9 +4,13 @@
 
 STATIC=false
 SNAPSHOT=false
+CMAKE=false
 for i in "$@"; do
 	if [ "`echo $i |cut -b1`" = "-" ]; then
 		case $i in
+		-c|--cmake)
+			CMAKE=true
+			;;
 		-s|--snapshot)
 			SNAPSHOT=true
 			;;
@@ -92,6 +96,9 @@ Summary:
 URL: http://$NAME.sf.net/
 License: GPL
 Group: System/Libraries
+EOF
+	$CMAKE && echo 'BuildRequires: cmake' >>$NAME.spec
+	cat >>$NAME.spec <<EOF
 
 %track
 prog %{name} = {
@@ -153,14 +160,20 @@ EOF
 EOF
 	fi
 
+	if $CMAKE; then
+		echo "%cmake" >>$NAME.spec
+		MAKEARGS=" -C build"
+	else
+		echo "%configure" >>$NAME.spec
+		MAKEARGS=""
+	fi
 	cat >>$NAME.spec <<EOF
-%configure
 
 %build
-%make
+%make$MAKEARGS
 
 %install
-%makeinstall_std
+%makeinstall_std$MAKEARGS
 
 %files
 %{_bindir}/*
@@ -173,6 +186,9 @@ EOF
 %{_libdir}/*.so
 %{_libdir}/pkgconfig/*
 EOF
+	if $CMAKE; then
+		echo '%{_libdir}/cmake/*' >>$NAME.spec
+	fi
 
 	if $STATIC; then
 		cat >>$NAME.spec <<EOF

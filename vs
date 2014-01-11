@@ -1,10 +1,18 @@
 #!/bin/bash
 
 SNAPSHOT=false
-if [ "$1" = "-s" -o "$1" = "--snapshot" ]; then
+CMAKE=false
+while [ "`echo $1 |cut -b1`" = "-" ]; do
+	case "$1" in
+	-s|--snapshot)
+		SNAPSHOT=true
+		;;
+	-c|--cmake)
+		CMAKE=true
+		;;
+	esac
 	shift
-	SNAPSHOT=true
-fi
+done
 
 NAME=`echo $1 |sed -e "s/\.spec$//"`
 [ -z "$EDITOR" ] && EDITOR="$VISUAL"
@@ -63,6 +71,9 @@ Summary:
 URL: http://$NAME.sf.net/
 License: GPL
 Group:
+EOF
+	$CMAKE && echo 'BuildRequires: cmake' >>~/rpmbuild/SPECS/$NAME.spec
+	cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
 
 %track
 prog %{name} = {
@@ -87,14 +98,19 @@ EOF
 	else
 		echo '%setup -q' >>~/rpmbuild/SPECS/$NAME.spec
 	fi
+	if $CMAKE; then
+		echo "%cmake" >>~/rpmbuild/SPECS/$NAME.spec
+		MAKEARGS=" -C build"
+	else
+		echo "%configure" >>~/rpmbuild/SPECS/$NAME.spec
+	fi
 	cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
-%configure
 
 %build
-%make
+%make$MAKEARGS
 
 %install
-%makeinstall_std
+%makeinstall_std$MAKEARGS
 
 %files
 # Leaving the "/" in here is _BAD_, but will generally work [packaging all
