@@ -5,6 +5,7 @@
 STATIC=false
 SNAPSHOT=false
 CMAKE=false
+TRACK=false
 for i in "$@"; do
 	if [ "`echo $i |cut -b1`" = "-" ]; then
 		case $i in
@@ -16,6 +17,9 @@ for i in "$@"; do
 			;;
 		-S|--static)
 			STATIC=true
+			;;
+		-t|--track)
+			TRACK=true
 			;;
 		esac
 		shift
@@ -98,7 +102,7 @@ License: GPL
 Group: System/Libraries
 EOF
 	$CMAKE && echo 'BuildRequires: cmake' >>$NAME.spec
-	cat >>$NAME.spec <<EOF
+	$TRACK && cat >>$NAME.spec <<EOF
 
 %track
 prog %{name} = {
@@ -106,6 +110,8 @@ prog %{name} = {
 	regex = "version (__VER__)"
 	version = %{version}
 }
+EOF
+	cat >>$NAME.spec <<EOF
 
 %description
 

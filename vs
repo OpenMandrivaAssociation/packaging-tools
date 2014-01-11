@@ -2,10 +2,14 @@
 
 SNAPSHOT=false
 CMAKE=false
+TRACK=false
 while [ "`echo $1 |cut -b1`" = "-" ]; do
 	case "$1" in
 	-s|--snapshot)
 		SNAPSHOT=true
+		;;
+	-t|--track)
+		TRACK=true
 		;;
 	-c|--cmake)
 		CMAKE=true
@@ -73,7 +77,8 @@ License: GPL
 Group:
 EOF
 	$CMAKE && echo 'BuildRequires: cmake' >>~/rpmbuild/SPECS/$NAME.spec
-	cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
+	if $TRACK; then
+		cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
 
 %track
 prog %{name} = {
@@ -81,6 +86,9 @@ prog %{name} = {
 	regex = "version (__VER__)"
 	version = %{version}
 }
+EOF
+	fi
+	cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
 
 %description
 
