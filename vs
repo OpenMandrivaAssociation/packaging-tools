@@ -66,7 +66,7 @@ EOF
 	else
 		cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
 Release: 1
-Source0: %{name}-%{varsion}.tar.xz
+Source0: %{name}-%{version}.tar.xz
 EOF
 	fi
 
