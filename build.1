@@ -1,0 +1,67 @@
+.TH build 1 "Dec  1, 2020" "OpenMandriva" "Developer Tools"
+.SH NAME
+build \- build a package on ABF
+.SH SYNOPSIS
+.br
+.B build
+[ -a arch ] [ -b branch ] [ -u updatetype ] [package] ...
+.SH OPTIONS
+.TP
+\fB-a\fR arch
+Architecture to build for. You can use multiple -a parameters to build for
+multiple architectures. If -a is not specified, the package will be built for
+all architectures.
+.TP
+\fB-b\fR branch
+Branch to build for. This will usually be \fBcooker\fR,
+\fBrolling\fR, or a released version number. If no branch is given,
+\fBcooker\fB is used.
+.TP
+\fB-u\fR updatetype
+Specify the update type. If unspecified, \fBrecommended\fR is used.
+.SH DESCRIPTION
+\fBbuild\fR tells the ABF build system (https://abf.openmandriva.org/) to
+build a package or multiple packages.
+.PP
+It is a simple wrapper around \fBabf chain-build\fR.
+.PP
+If no project is given, build will use the name of the current working
+directory.
+.br
+This is useful in the context of e.g.
+.NF
+  $ co mypackage
+.br
+  $ vi mypackage.spec
+.br
+  $ git commit -a
+.br
+  $ git push origin master
+.br
+  $ build
+.SH EXAMPLE
+.SP
+.NF
+To rebuild plasma-desktop for cooker for aarch64:
+.br
+  $ build -a aarch64 plasma-desktop
+.PP
+To build package-tools and rpm for rolling on x86_64 and znver1:
+.br
+  $ build -a x86_64 -a znver1 -b rolling package-tools rpm
+.PP
+To build the package named like the current directory for cooker for all architectures:
+.br
+  $ build
+.br
+.FI
+.PD
+.SH "SEE ALSO"
+.BR co (1),
+.BR abb (1),
+.BR abf (1)
+
+.SH AUTHOR
+.nf
+Bernhard Rosenkraenzer <bero@lindev.ch>
+.fi

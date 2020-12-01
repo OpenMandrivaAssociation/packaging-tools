@@ -1,0 +1,35 @@
+.TH b 1 "Dec  1, 2020" "OpenMandriva" "Developer Tools"
+.SH NAME
+b \- build a package (locally)
+.SH SYNOPSIS
+.br
+.B b
+PACKAGE
+.SH DESCRIPTION
+\fBb\fR installs a package's build dependencies and builds the
+package already checked out into a flat directory, for example
+using the \fBco\fR command.
+.SH EXAMPLE
+.SP
+.NF
+  $ co plasma-desktop
+.br
+  $ vi plasma-desktop.spec
+.br
+  $ b
+.br
+  $ git commit ; git push origin master
+.br
+  $ build
+.FI
+.PD
+.SH "SEE ALSO"
+.BR co (1),
+.BR build (1),
+.BR abb (1),
+.BR abf (1)
+
+.SH AUTHOR
+.nf
+Bernhard Rosenkraenzer <bero@lindev.ch>
+.fi

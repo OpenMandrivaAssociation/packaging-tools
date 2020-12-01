@@ -1,0 +1,36 @@
+.TH co 1 "Dec  1, 2020" "OpenMandriva" "Developer Tools"
+.SH NAME
+co \- check out a package from OpenMandriva git repositories
+.SH SYNOPSIS
+.br
+.B co
+PACKAGE
+.SH DESCRIPTION
+\fBco\fR checks out a package from OpenMandriva git repositories into
+\fB~/abf/PACKAGE\fR and retrieves the referenced source files from
+file-store.openmandriva.org.
+It also takes you to the directory containing the checkout.
+.SH EXAMPLE
+.SP
+.NF
+  $ co plasma-desktop
+.br
+  $ vi plasma-desktop.spec
+.br
+  $ b
+.br
+  $ git commit ; git push origin master
+.br
+  $ build
+.FI
+.PD
+.SH "SEE ALSO"
+.BR b (1),
+.BR build (1),
+.BR abb (1),
+.BR abf (1)
+
+.SH AUTHOR
+.nf
+Bernhard Rosenkraenzer <bero@lindev.ch>
+.fi
