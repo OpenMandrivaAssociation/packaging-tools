@@ -1,6 +1,6 @@
 #!/bin/bash
 # Spec file generator for perl modules
-# (c) 2000-2013 Bernhard Rosenkraenzer <bero@lindev.ch>
+# (c) 2000-2021 Bernhard Rosenkraenzer <bero@lindev.ch>
 
 NAME=`echo $1 |sed -e "s/\.spec$//"`
 if [ -z "$EDITOR" ]; then
@@ -22,33 +22,26 @@ Name: perl-%{module}
 Version:
 Release: 1
 Summary:
-URL: http://search.cpan.org/dist/%{module}
+URL: https://metacpan.org/pod/%{module}
 Source: http://mirror.switch.ch/ftp/mirror/CPAN/authors/id/X/XX/XXX/%module/%{module}-%{version}.tar.gz
 License: Perl (Artistic or GPL)
 Group: Development/Languages
 BuildArch: noarch
 
-%track
-prog %{name} = {
-	url = http://search.cpan.org/dist/%{module}
-	regex = "%{module}-(__VER__)"
-	version = %{version}
-}
-
 %description
 
 %prep
-%setup -q -n %{module}-%{version}
+%autosetup -p1 -n %{module}-%{version}
 
 %build
 %{__perl} Makefile.PL INSTALLDIRS=vendor
-%make
+%make_build
 
 %check
 make test
 
 %install
-%makeinstall_std INSTALLDIRS=vendor
+%make_install INSTALLDIRS=vendor
 
 %files
 %doc Changes MANIFEST README

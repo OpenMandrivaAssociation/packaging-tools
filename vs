@@ -2,17 +2,17 @@
 
 SNAPSHOT=false
 CMAKE=false
-TRACK=false
+MESON=false
 while [ "`echo $1 |cut -b1`" = "-" ]; do
 	case "$1" in
 	-s|--snapshot)
 		SNAPSHOT=true
 		;;
-	-t|--track)
-		TRACK=true
-		;;
 	-c|--cmake)
 		CMAKE=true
+		;;
+	-m|--meson)
+		MESON=true
 		;;
 	esac
 	shift
@@ -48,7 +48,7 @@ EOF
 %if "%{beta}" == ""
 %if "%{scmrev}" == ""
 Release: 1
-Source0: %{name}-%{version}.tar.bz2
+Source0: %{name}-%{version}.tar.xz
 %else
 Release: 0.%{scmrev}.1
 Source0: %{name}-%{scmrev}.tar.xz
@@ -56,7 +56,7 @@ Source0: %{name}-%{scmrev}.tar.xz
 %else
 %if "%{scmrev}" == ""
 Release: 0.%{beta}.1
-Source0: %{name}-%{version}%{beta}.tar.bz2
+Source0: %{name}-%{version}%{beta}.tar.xz
 %else
 Release: 0.%{beta}.0.%{scmrev}.1
 Source0: %{name}-%{scmrev}.tar.xz
@@ -76,18 +76,8 @@ URL: http://$NAME.sf.net/
 License: GPL
 Group:
 EOF
-	$CMAKE && echo 'BuildRequires: cmake' >>~/rpmbuild/SPECS/$NAME.spec
-	if $TRACK; then
-		cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
-
-%track
-prog %{name} = {
-	url = http://
-	regex = "version (__VER__)"
-	version = %{version}
-}
-EOF
-	fi
+	$CMAKE && echo 'BuildRequires: cmake ninja' >>~/rpmbuild/SPECS/$NAME.spec
+	$MESON && echo 'BuildRequires: meson ninja' >>~/rpmbuild/SPECS/$NAME.spec
 	cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
 
 %description
@@ -97,28 +87,32 @@ EOF
 
 	if $SNAPSHOT; then
 		cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
-%if "%{scmrev}" == ""
-%setup -q -n %{name}-%{version}%{beta}
-%else
-%setup -q -n %{name}
-%endif
+%autosetup -p1 -n %{name}%{!?scmrev:-%{version}%{?beta:%{beta}}}
 EOF
 	else
-		echo '%setup -q' >>~/rpmbuild/SPECS/$NAME.spec
+		echo '%autosetup -p1' >>~/rpmbuild/SPECS/$NAME.spec
 	fi
 	if $CMAKE; then
-		echo "%cmake" >>~/rpmbuild/SPECS/$NAME.spec
+		echo "%cmake -G Ninja" >>~/rpmbuild/SPECS/$NAME.spec
 		MAKEARGS=" -C build"
+	elif $MESON; then
+		echo "%meson" >>~/rpmbuild/SPECS/$NAME.spec
 	else
 		echo "%configure" >>~/rpmbuild/SPECS/$NAME.spec
+	fi
+	if $CMAKE || $MESON; then
+		BUILDTOOL=ninja
+		MAKEARGS="$MAKEARGS -C build"
+	else
+		BUILDTOOL=make
 	fi
 	cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
 
 %build
-%make$MAKEARGS
+%${BUILDTOOL}_build$MAKEARGS
 
 %install
-%makeinstall_std$MAKEARGS
+%${BUILDTOOL}_install$MAKEARGS
 
 %files
 # Leaving the "/" in here is _BAD_, but will generally work [packaging all

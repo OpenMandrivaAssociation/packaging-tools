@@ -18,9 +18,6 @@ for i in "$@"; do
 		-S|--static)
 			STATIC=true
 			;;
-		-t|--track)
-			TRACK=true
-			;;
 		esac
 		shift
 	fi
@@ -102,15 +99,6 @@ License: GPL
 Group: System/Libraries
 EOF
 	$CMAKE && echo 'BuildRequires: cmake' >>$NAME.spec
-	$TRACK && cat >>$NAME.spec <<EOF
-
-%track
-prog %{name} = {
-	url = http://
-	regex = "version (__VER__)"
-	version = %{version}
-}
-EOF
 	cat >>$NAME.spec <<EOF
 
 %description
@@ -155,14 +143,14 @@ EOF
 	if $SNAPSHOT; then
 		cat >>$NAME.spec <<EOF
 %if "%{scmrev}" == ""
-%setup -q -n %{name}-%{version}%{beta}
+%autosetup -p1 -n %{name}-%{version}%{beta}
 %else
-%setup -q -n %{name}
+%autosetup -p1 -n %{name}
 %endif
 EOF
 	else
 		cat >>$NAME.spec <<EOF
-%setup -q
+%autosetup -p1
 EOF
 	fi
 
@@ -176,10 +164,10 @@ EOF
 	cat >>$NAME.spec <<EOF
 
 %build
-%make$MAKEARGS
+%make_build$MAKEARGS
 
 %install
-%makeinstall_std$MAKEARGS
+%make_install$MAKEARGS
 
 %files
 %{_bindir}/*

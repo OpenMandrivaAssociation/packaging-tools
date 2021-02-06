@@ -1,6 +1,6 @@
 #!/bin/bash
 # Spec file generator for Java packages
-# (c) 2005-2013 Bernhard Rosenkraenzer <bero@lindev.ch>
+# (c) 2005-2021 Bernhard Rosenkraenzer <bero@lindev.ch>
 
 NAME=`echo $1 |sed -e "s/\.spec$//"`
 if [ -z "$EDITOR" ]; then
@@ -24,7 +24,7 @@ URL: http://$NAME.sf.net/
 Source: %{name}-%{version}.tar.bz2
 License: ASF 2.0
 Group: Libraries/Java
-BuildRequires: java-1.6.0-openjdk-devel
+BuildRequires: jdk-current
 BuildArch: noarch
 
 %description
@@ -38,9 +38,10 @@ Requires: %{name} = %{version}-%{release}
 Javadoc for %{name}.
 
 %prep
-%setup
+%autosetup -p1
 
 %build
+. %{_sysconfdir}/profile.d/90java.sh
 ant dist
 
 %install

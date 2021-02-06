@@ -1,10 +1,11 @@
-.TH vs 1 "May 16, 2013" "OpenMandriva" "Developer Tools"
+.TH vs 1 "Feb  6, 2021" "OpenMandriva" "Developer Tools"
 .SH NAME
 vs \- simple RPM spec file editor
 .SH SYNOPSIS
 .br
 .B vs
 [-c|--cmake]
+[-m|--meson]
 [-s|--snapshot]
 <app>
 .SH OPTIONS
@@ -12,11 +13,11 @@ vs \- simple RPM spec file editor
 .BI \-c\fR,\ \fB\-\-cmake
 Create a template for a project using cmake rather than autoconf
 .TP
+.BI \-m\fR,\ \fB\-\-meson
+Create a template for a project using meson rather than autoconf
+.TP
 .BI \-s\fR,\ \fB\-\-snapshot
 Create constructs to allow building an SCM snapshot
-.TP
-.BI \-t\fR,\ \fB\-\-track
-Create a %track section
 .SH DESCRIPTION
 \fBvs\fR ("vi specfile") is a simple generator for RPM spec files (the
 files controlling the build process of RPM packages).
@@ -38,7 +39,7 @@ packaging a Java library, use \fBvj (1)\fR.
 .br
   $ cd ~/rpmbuild/SPECS
 .br
-  $ rpm -ba myfavoriteapp.spec
+  $ rpmbuild -ba myfavoriteapp.spec
 .FI
 .PD
 .SH "SEE ALSO"
