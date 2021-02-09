@@ -1,6 +1,6 @@
 Summary:	Tools that make packagers' lives easier
 Name:		packaging-tools
-Version:	2.0.1
+Version:	2.0.2
 Release:	1
 License:	Public Domain
 Group:		Development/Other

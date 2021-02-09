@@ -88,13 +88,13 @@ EOF
 	else
 		cat >>$NAME.spec <<EOF
 Release: 1
-Source0: %{name}-%{version}.tar.xz
+Source0: https://github.com/$NAME/$NAME/archive/%{version}/%{name}-%{version}.tar.gz
 EOF
 	fi
 
 	cat >>$NAME.spec <<EOF
 Summary:
-URL: http://$NAME.sf.net/
+URL: https://github.com/$NAME/$NAME
 License: GPL
 Group: System/Libraries
 EOF

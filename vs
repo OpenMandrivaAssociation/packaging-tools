@@ -66,13 +66,13 @@ EOF
 	else
 		cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
 Release: 1
-Source0: %{name}-%{version}.tar.xz
+Source0: https://github.com/$NAME/$NAME/archive/%{version}/%{name}-%{version}.tar.gz
 EOF
 	fi
 
 	cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
 Summary:
-URL: http://$NAME.sf.net/
+URL: https://github.com/$NAME/$NAME
 License: GPL
 Group:
 EOF
@@ -94,7 +94,6 @@ EOF
 	fi
 	if $CMAKE; then
 		echo "%cmake -G Ninja" >>~/rpmbuild/SPECS/$NAME.spec
-		MAKEARGS=" -C build"
 	elif $MESON; then
 		echo "%meson" >>~/rpmbuild/SPECS/$NAME.spec
 	else
