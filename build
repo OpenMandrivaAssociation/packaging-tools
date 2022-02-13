@@ -2,6 +2,8 @@
 ARCHES=""
 BRANCH=master
 UPDATETYPE="recommended"
+TESTING=""
+PUBLISH="default"
 PROJ=""
 while [ -n "$1" ]; do
 	if [ "$1" = "-a" -o "$1" = "--arch" ]; then
@@ -17,6 +19,13 @@ while [ -n "$1" ]; do
 	elif [ "$1" = "-u" -o "$1" = "--updatetype" ]; then
 		shift
 		UPDATETYPE="$1"
+	elif [ "$1" = "-t" ]; then
+		TESTING="--testing"
+	elif [ "$1" = "-T" ]; then
+		PUBLISH="testing"
+	elif [ "$1" = "-p" ]; then
+		shift
+		PUBLISH="$1"
 	elif [ "$1" = "." ]; then
 		PROJ="$PROJ openmandriva/$(basename $(pwd))"
 	else
@@ -27,4 +36,4 @@ done
 [ -z "$PROJ" ] && PROJ="openmandriva/$(basename $(pwd))"
 [ -z "$ARCHES" ] && ARCHES="-a znver1 -a x86_64 -a aarch64 -a i686 -a armv7hnl -a riscv64"
 
-exec abf chain_build --no-cached-chroot -b $BRANCH --auto-publish --update-type $UPDATETYPE $ARCHES $PROJ
+exec abf chain_build --no-cached-chroot -b $BRANCH --auto-publish-status $PUBLISH $TESTING --update-type $UPDATETYPE $ARCHES $PROJ

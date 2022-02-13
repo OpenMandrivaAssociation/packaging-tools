@@ -1,0 +1,38 @@
+.TH vs 1 "Feb  6, 2021" "Ark Linux" "Developer Tools"
+.SH NAME
+vp \- simple RPM spec file generator for perl modules
+.SH SYNOPSIS
+.br
+.B vpl
+<app>
+.SH DESCRIPTION
+\fBvpl\fR is a simple generator for RPM spec files (the files controlling the
+build process of RPM packages) for perl modules.
+.PP
+\fBvpl\fR creates a spec file template, and invokes an editor (usually
+\fBvim\fR, but \fBvs\fR respects the \fBEDITOR\fR and \fBVISUAL\fR environment
+variables) to edit the file.
+.PP
+All you need to do is fill in the blanks and possibly overwrite some default
+settings.
+.SH EXAMPLE
+.SP
+.NF
+  $ vp perl-somemodule
+.br
+  $ cd ~/abf/perl-somemodule
+.br
+  $ abb build
+.FI
+.PD
+.SH "SEE ALSO"
+.BR rpm (8),
+.BR vs (1),
+.BR vl (1),
+.BR vj (1),
+.BR e (1)
+
+.SH AUTHOR
+.nf
+Bernhard Rosenkraenzer <bero@lindev.ch>
+.fi

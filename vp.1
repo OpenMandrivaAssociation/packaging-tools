@@ -1,28 +1,35 @@
-.TH vs 1 "Feb  6, 2021" "Ark Linux" "Developer Tools"
+.TH vs 1 "Feb  6, 2021" "OpenMandriva" "Developer Tools"
 .SH NAME
-vp \- simple RPM spec file editor for perl modules
+vp \- simple RPM spec file generator for Python modules
 .SH SYNOPSIS
 .br
-.B vs
+.B vp
+[-s|--snapshot]
 <app>
+.SH OPTIONS
+.BI \-s\fR,\ \fB\-\-snapshot
+Create constructs to allow building an SCM snapshot
 .SH DESCRIPTION
-\fBvp\fR is a simple generator for RPM spec files (the files controlling the
-build process of RPM packages) for perl modules.
+\fBvp\fR ("vi python-specfile") is a simple generator for RPM spec files (the
+files controlling the build process of RPM packages) packaging python modules.
 .PP
-\fBvp\fR creates a spec file template, and invokes an editor (usually
+\fBvs\fR creates a spec file template, and invokes an editor (usually
 \fBvim\fR, but \fBvs\fR respects the \fBEDITOR\fR and \fBVISUAL\fR environment
 variables) to edit the file.
 .PP
 All you need to do is fill in the blanks and possibly overwrite some default
 settings.
+.PP
+If you are trying to package a (non-python) library, \fBvl (1)\fR is preferrable over
+\fBvp\fR. Use \fBvs (1)\fR for generic packages.
 .SH EXAMPLE
 .SP
 .NF
-  $ vp perl-somemodule
+  $ vp python-mymodule
 .br
-  $ cd ~/rpmbuild/SPECS
+  $ cd ~/abf/python-mymodule
 .br
-  $ rpm -ba perl-somemodule.spec
+  $ abb build
 .FI
 .PD
 .SH "SEE ALSO"
@@ -30,6 +37,7 @@ settings.
 .BR vs (1),
 .BR vl (1),
 .BR vj (1),
+.BR vpl (1),
 .BR e (1)
 
 .SH AUTHOR

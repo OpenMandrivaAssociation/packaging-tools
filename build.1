@@ -15,7 +15,18 @@ all architectures.
 \fB-b\fR branch
 Branch to build for. This will usually be \fBcooker\fR,
 \fBrolling\fR, or a released version number. If no branch is given,
-\fBcooker\fB is used.
+\fBcooker\fR is used.
+.TP
+\f8-p\fR publishtarget
+Publish to \fBpublishtarget\fR (\fBdefault\fR, \fBtesting\fR or \fBnone\fR).
+By default, \fBdefault\fR is used.
+.TP
+\f8-t\fR
+Include testing repository.
+Packages currently in testing will be installed into the buildroot.
+.TP
+\f8-T\fR
+Publish to \fBtesting\fR. This is a shortcut for \fB-p testing\fR.
 .TP
 \fB-u\fR updatetype
 Specify the update type. If unspecified, \fBrecommended\fR is used.

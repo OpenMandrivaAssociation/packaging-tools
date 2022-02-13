@@ -23,28 +23,26 @@ NAME=`echo $1 |sed -e "s/\.spec$//"`
 if [ -z "$EDITOR" ]; then
 	if [ -e /usr/bin/vim ]; then
 		EDITOR=/usr/bin/vim
-	else
-		EDITOR=/bin/vi
 	fi
 fi
 ID="`cat /etc/passwd |grep "^$(id -un):" |cut -d: -f5` <`id -un`@`hostname |cut -d. -f2-`>"
 [ -e ~/.vs ] && source ~/.vs
 
-if [ ! -e ~/rpmbuild/SPECS/$NAME.spec ]; then
+if [ ! -e ~/abf/$NAME/$NAME.spec ]; then
 	if $SNAPSHOT; then
-		cat >~/rpmbuild/SPECS/$NAME.spec <<EOF
+		cat >~/abf/$NAME/$NAME.spec <<EOF
 %define beta %{nil}
 %define scmrev %{nil}
 
 EOF
 	fi
-	cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
+	cat >>~/abf/$NAME/$NAME.spec <<EOF
 Name: $NAME
 Version:
 EOF
 
 	if $SNAPSHOT; then
-		cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
+		cat >>~/abf/$NAME/$NAME.spec <<EOF
 %if "%{beta}" == ""
 %if "%{scmrev}" == ""
 Release: 1
@@ -64,21 +62,21 @@ Source0: %{name}-%{scmrev}.tar.xz
 %endif
 EOF
 	else
-		cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
+		cat >>~/abf/$NAME/$NAME.spec <<EOF
 Release: 1
 Source0: https://github.com/$NAME/$NAME/archive/%{version}/%{name}-%{version}.tar.gz
 EOF
 	fi
 
-	cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
+	cat >>~/abf/$NAME/$NAME.spec <<EOF
 Summary:
 URL: https://github.com/$NAME/$NAME
 License: GPL
 Group:
 EOF
-	$CMAKE && echo 'BuildRequires: cmake ninja' >>~/rpmbuild/SPECS/$NAME.spec
-	$MESON && echo 'BuildRequires: meson ninja' >>~/rpmbuild/SPECS/$NAME.spec
-	cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
+	$CMAKE && echo 'BuildRequires: cmake ninja' >>~/abf/$NAME/$NAME.spec
+	$MESON && echo 'BuildRequires: meson ninja' >>~/abf/$NAME/$NAME.spec
+	cat >>~/abf/$NAME/$NAME.spec <<EOF
 
 %description
 
@@ -86,18 +84,18 @@ EOF
 EOF
 
 	if $SNAPSHOT; then
-		cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
+		cat >>~/abf/$NAME/$NAME.spec <<EOF
 %autosetup -p1 -n %{name}%{!?scmrev:-%{version}%{?beta:%{beta}}}
 EOF
 	else
-		echo '%autosetup -p1' >>~/rpmbuild/SPECS/$NAME.spec
+		echo '%autosetup -p1' >>~/abf/$NAME/$NAME.spec
 	fi
 	if $CMAKE; then
-		echo "%cmake -G Ninja" >>~/rpmbuild/SPECS/$NAME.spec
+		echo "%cmake -G Ninja" >>~/abf/$NAME/$NAME.spec
 	elif $MESON; then
-		echo "%meson" >>~/rpmbuild/SPECS/$NAME.spec
+		echo "%meson" >>~/abf/$NAME/$NAME.spec
 	else
-		echo "%configure" >>~/rpmbuild/SPECS/$NAME.spec
+		echo "%configure" >>~/abf/$NAME/$NAME.spec
 	fi
 	if $CMAKE || $MESON; then
 		BUILDTOOL=ninja
@@ -105,7 +103,7 @@ EOF
 	else
 		BUILDTOOL=make
 	fi
-	cat >>~/rpmbuild/SPECS/$NAME.spec <<EOF
+	cat >>~/abf/$NAME/$NAME.spec <<EOF
 
 %build
 %${BUILDTOOL}_build$MAKEARGS
@@ -121,4 +119,4 @@ EOF
 /
 EOF
 fi
-exec "$EDITOR" ~/rpmbuild/SPECS/"$NAME".spec
+exec "$EDITOR" ~/abf/$NAME/"$NAME".spec

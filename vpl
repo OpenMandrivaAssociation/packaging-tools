@@ -1,0 +1,51 @@
+#!/bin/bash
+# Spec file generator for perl modules
+# (c) 2000-2021 Bernhard Rosenkraenzer <bero@lindev.ch>
+
+NAME=`echo $1 |sed -e "s/\.spec$//"`
+if [ -z "$EDITOR" ]; then
+	if [ -e /usr/bin/vim ]; then
+		EDITOR=/usr/bin/vim
+	else
+		EDITOR=/bin/vi
+	fi
+fi
+ID="`cat /etc/passwd |grep "^$(id -un):" |cut -d: -f5` <`id -un`@`hostname |cut -d. -f2-`>"
+[ -e ~/.vs ] && source ~/.vs
+
+cd ~/rpmbuild/SPECS
+if [ ! -e "perl-$NAME.spec" ]; then
+	cat >"perl-$NAME.spec" <<EOF
+%define module $NAME
+
+Name: perl-%{module}
+Version:
+Release: 1
+Summary:
+URL: https://metacpan.org/pod/%{module}
+Source: http://mirror.switch.ch/ftp/mirror/CPAN/authors/id/X/XX/XXX/%module/%{module}-%{version}.tar.gz
+License: Perl (Artistic or GPL)
+Group: Development/Languages
+BuildArch: noarch
+
+%description
+
+%prep
+%autosetup -p1 -n %{module}-%{version}
+
+%build
+%{__perl} Makefile.PL INSTALLDIRS=vendor
+%make_build
+
+%check
+make test
+
+%install
+%make_install INSTALLDIRS=vendor
+
+%files
+%doc Changes MANIFEST README
+%{perl_vendorlib}/*/*
+EOF
+fi
+exec $EDITOR perl-"$NAME".spec

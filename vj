@@ -6,14 +6,12 @@ NAME=`echo $1 |sed -e "s/\.spec$//"`
 if [ -z "$EDITOR" ]; then
 	if [ -e /usr/bin/vim ]; then
 		EDITOR=/usr/bin/vim
-	else
-		EDITOR=/bin/vi
 	fi
 fi
 ID="`cat /etc/passwd |grep "^$(id -un):" |cut -d: -f5` <`id -un`@`hostname |cut -d. -f2-`>"
 [ -e ~/.vs ] && source ~/.vs
 
-cd ~/rpmbuild/SPECS
+cd ~/abf/$NAME
 if [ ! -e $NAME.spec ]; then
 	cat >$NAME.spec <<EOF
 Name: $NAME

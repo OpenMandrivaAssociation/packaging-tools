@@ -1,6 +1,6 @@
 .TH vs 1 "Feb  6, 2021" "OpenMandriva" "Developer Tools"
 .SH NAME
-vs \- simple RPM spec file editor
+vs \- simple RPM spec file generator
 .SH SYNOPSIS
 .br
 .B vs
@@ -30,16 +30,17 @@ All you need to do is fill in the blanks and possibly overwrite some default
 settings.
 .PP
 If you are trying to package a library, \fBvl (1)\fR is preferrable over
-\fBvs\fR. If you are packaging a perl module, use \fBvp (1)\fR. If you are
+\fBvs\fR. If you are packaging a python module, use \fBvp (1)\fR.
+If you are packaging a perl module, use \fBvpl (1)\fR. If you are
 packaging a Java library, use \fBvj (1)\fR.
 .SH EXAMPLE
 .SP
 .NF
   $ vs myfavoriteapp
 .br
-  $ cd ~/rpmbuild/SPECS
+  $ cd ~/abf/myfavoriteapp
 .br
-  $ rpmbuild -ba myfavoriteapp.spec
+  $ abb build
 .FI
 .PD
 .SH "SEE ALSO"
@@ -47,6 +48,7 @@ packaging a Java library, use \fBvj (1)\fR.
 .BR vl (1),
 .BR vj (1),
 .BR vp (1),
+.BR vpl (1),
 .BR e (1)
 
 .SH AUTHOR
