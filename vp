@@ -11,6 +11,7 @@ while [ "`echo $1 |cut -b1`" = "-" ]; do
 done
 
 NAME=`echo $1 |sed -e "s/\.spec$//"`
+PNAME="python-$NAME"
 [ -z "$EDITOR" ] && EDITOR="$VISUAL"
 if [ -z "$EDITOR" ]; then
 	if [ -e /usr/bin/vim ]; then
@@ -19,69 +20,83 @@ if [ -z "$EDITOR" ]; then
 fi
 ID="`cat /etc/passwd |grep "^$(id -un):" |cut -d: -f5` <`id -un`@`hostname |cut -d. -f2-`>"
 [ -e ~/.vs ] && source ~/.vs
+[ -z "$ABFDIR" ] && ABFDIR=~/abf
 
-if [ ! -e ~/abf/$NAME/$NAME.spec ]; then
+curl https://pypi.org/pypi/$NAME/json >/tmp/$NAME.$$
+if [ -e /tmp/$NAME.$$ ]; then
+	V=`cat /tmp/$NAME.$$ |python -c "import sys,json; print(json.load(sys.stdin)['info']['version']);"`
+	S=`cat /tmp/$NAME.$$ |python -c "import sys,json; print(json.load(sys.stdin)['info']['summary']);"`
+	# SS -- short summary (newlines killed)
+	SS=`echo $S |xargs echo`
+	L=`cat /tmp/$NAME.$$ |python -c "import sys,json; print(json.load(sys.stdin)['info']['license']);"`
+	rm -f /tmp/$NAME.$$
+fi
+[ -z "$L" ] && L="GPL"
+
+mkdir -p $ABFDIR/$PNAME
+if [ ! -e $ABFDIR/$PNAME/$PNAME.spec ]; then
 	if $SNAPSHOT; then
-		cat >~/abf/$NAME/$NAME.spec <<EOF
+		cat >$ABFDIR/$PNAME/$PNAME.spec <<EOF
 %define beta %{nil}
 %define scmrev %{nil}
 
 EOF
 	fi
-	cat >>~/abf/$NAME/$NAME.spec <<EOF
-Name: $NAME
-Version:
+	cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
+Name:		$PNAME
+Version:	$V
 EOF
 
 	if $SNAPSHOT; then
-		cat >>~/abf/$NAME/$NAME.spec <<EOF
+		cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
 %if "%{beta}" == ""
 %if "%{scmrev}" == ""
-Release: 1
-Source0: %{name}-%{version}.tar.xz
+Release:	1
+Source0:	%{name}-%{version}.tar.xz
 %else
-Release: 0.%{scmrev}.1
-Source0: %{name}-%{scmrev}.tar.xz
+Release:	0.%{scmrev}.1
+Source0:	%{name}-%{scmrev}.tar.xz
 %endif
 %else
 %if "%{scmrev}" == ""
-Release: 0.%{beta}.1
-Source0: %{name}-%{version}%{beta}.tar.xz
+Release:	0.%{beta}.1
+Source0:	%{name}-%{version}%{beta}.tar.xz
 %else
-Release: 0.%{beta}.0.%{scmrev}.1
-Source0: %{name}-%{scmrev}.tar.xz
+Release:	0.%{beta}.0.%{scmrev}.1
+Source0:	%{name}-%{scmrev}.tar.xz
 %endif
 %endif
 EOF
 	else
-		cat >>~/abf/$NAME/$NAME.spec <<EOF
-Release: 1
-Source0: https://files.pythonhosted.org/packages/source/$(echo $NAME |cut -b1)/$NAME/$NAME-%{version}.tar.gz
+		cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
+Release:	1
+Source0:	https://files.pythonhosted.org/packages/source/$(echo $NAME |cut -b1)/$NAME/$NAME-%{version}.tar.gz
 EOF
 	fi
 
-	cat >>~/abf/$NAME/$NAME.spec <<EOF
-Summary:
-URL: https://pypi.org/project/$NAME/
-License: GPL
-Group:
+	cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
+Summary:	$SS
+URL:		https://pypi.org/project/$NAME/
+License:	$L
+Group:		Development/Python
 EOF
-	cat >>~/abf/$NAME/$NAME.spec <<EOF
+	cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
 BuildRequires:	python-setuptools
 
 %description
+$S
 
 %prep
 EOF
 
 	if $SNAPSHOT; then
-		cat >>~/abf/$NAME/$NAME.spec <<EOF
+		cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
 %autosetup -p1 -n ${NAME}%{!?scmrev:-%{version}%{?beta:%{beta}}}
 EOF
 	else
-		echo "%autosetup -p1 -n $NAME-%{version}" >>~/abf/$NAME/$NAME.spec
+		echo "%autosetup -p1 -n $NAME-%{version}" >>$ABFDIR/$PNAME/$PNAME.spec
 	fi
-	cat >>~/abf/$NAME/$NAME.spec <<EOF
+	cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
 
 %build
 python setup.py build
@@ -97,4 +112,4 @@ python setup.py install --skip-build --root=%{buildroot}
 /
 EOF
 fi
-exec "$EDITOR" ~/abf/$NAME/"$NAME".spec
+exec "$EDITOR" "$ABFDIR/$PNAME/$PNAME".spec
