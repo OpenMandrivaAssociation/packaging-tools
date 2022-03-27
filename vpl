@@ -12,8 +12,10 @@ if [ -z "$EDITOR" ]; then
 fi
 ID="`cat /etc/passwd |grep "^$(id -un):" |cut -d: -f5` <`id -un`@`hostname |cut -d. -f2-`>"
 [ -e ~/.vs ] && source ~/.vs
+[ -z "$ABFDIR" ] && ABFDIR=~/abf
 
-cd ~/rpmbuild/SPECS
+mkdir -p "$ABFDIR/$NAME"
+cd "$ABFDIR/$NAME"
 if [ ! -e "perl-$NAME.spec" ]; then
 	cat >"perl-$NAME.spec" <<EOF
 %define module $NAME
