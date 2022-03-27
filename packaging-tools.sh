@@ -1,4 +1,4 @@
-alias ba='rpm -ba --define "_sourcedir `pwd`" *.spec'
+alias ba='rpmbuild -ba --define "_sourcedir `pwd`" *.spec'
 alias m="make -j `getconf _NPROCESSORS_ONLN` || make"
 co() {
 	mkdir -p ~/abf
