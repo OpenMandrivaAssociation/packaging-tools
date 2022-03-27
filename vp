@@ -11,7 +11,12 @@ while [ "`echo $1 |cut -b1`" = "-" ]; do
 done
 
 NAME=`echo $1 |sed -e "s/\.spec$//"`
-PNAME="python-$NAME"
+if echo $NAME |grep -q '^python-'; then
+	PNAME="$NAME"
+	NAME="`echo $NAME |cut -b8-`"
+else
+	PNAME="python-$NAME"
+fi
 [ -z "$EDITOR" ] && EDITOR="$VISUAL"
 if [ -z "$EDITOR" ]; then
 	if [ -e /usr/bin/vim ]; then
@@ -52,18 +57,18 @@ EOF
 %if "%{beta}" == ""
 %if "%{scmrev}" == ""
 Release:	1
-Source0:	%{name}-%{version}.tar.xz
+Source0:	$NAME-%{version}.tar.xz
 %else
 Release:	0.%{scmrev}.1
-Source0:	%{name}-%{scmrev}.tar.xz
+Source0:	$NAME-%{scmrev}.tar.xz
 %endif
 %else
 %if "%{scmrev}" == ""
 Release:	0.%{beta}.1
-Source0:	%{name}-%{version}%{beta}.tar.xz
+Source0:	$NAME-%{version}%{beta}.tar.xz
 %else
 Release:	0.%{beta}.0.%{scmrev}.1
-Source0:	%{name}-%{scmrev}.tar.xz
+Source0:	$NAME-%{scmrev}.tar.xz
 %endif
 %endif
 EOF
