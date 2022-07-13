@@ -34,6 +34,6 @@ while [ -n "$1" ]; do
 	shift
 done
 [ -z "$PROJ" ] && PROJ="openmandriva/$(basename $(pwd))"
-[ -z "$ARCHES" ] && ARCHES="-a znver1 -a x86_64 -a aarch64 -a i686 -a armv7hnl -a riscv64"
+[ -z "$ARCHES" ] && ARCHES="-a znver1 -a x86_64 -a aarch64" # -a armv7hnl -a riscv64 -a i686
 
 exec abf chain_build --no-cached-chroot -b $BRANCH --auto-publish-status $PUBLISH $TESTING --update-type $UPDATETYPE $ARCHES $PROJ

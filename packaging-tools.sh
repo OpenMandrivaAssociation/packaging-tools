@@ -5,5 +5,5 @@ co() {
 	cd ~/abf
 	git clone git@github.com:OpenMandrivaAssociation/$1.git
 	cd $1
-	abf fetch
+	[ -e .abf.yml ] && abf fetch
 }
