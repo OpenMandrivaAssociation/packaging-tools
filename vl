@@ -52,7 +52,7 @@ EOF
 EOF
 	fi
 	cat >>$NAME.spec <<EOF
-%define libname %mklibname ${NAME/lib/} %{major}
+%define libname %mklibname ${NAME/lib/}
 %define devname %mklibname ${NAME/lib/} -d
 EOF
 	if $STATIC; then
