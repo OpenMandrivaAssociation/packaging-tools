@@ -86,7 +86,8 @@ License:	$L
 Group:		Development/Python
 EOF
 	cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
-BuildRequires:	python-setuptools
+BuildRequires:	python%{pyver}dist(pip)
+BuildArch:	noarch
 
 %description
 $S
@@ -104,17 +105,14 @@ EOF
 	cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
 
 %build
-python setup.py build
+%py_build
 
 %install
-python setup.py install --skip-build --root=%{buildroot}
+%py_install
 
 %files
-# Leaving the "/" in here is _BAD_, but will generally work [packaging all
-# files] for testing.
-# Please replace it with an actual file list to prevent your package from
-# owning all system directories.
-/
+%{py_sitedir}/$NAME
+%{py_sitedir}/${NAME/-/_}-*.*-info
 EOF
 fi
 exec "$EDITOR" "$ABFDIR/$PNAME/$PNAME".spec
