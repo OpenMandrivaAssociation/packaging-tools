@@ -1,0 +1,25 @@
+#!/bin/sh
+P="$(basename $(realpath $(pwd)))"
+
+if ! [ -e $P.spec ]; then
+	echo "Failed basic sanity check."
+	echo "This tool must be run in a directory containing the files for"
+	echo "the new package - at least including a $P.spec file."
+	exit 1
+fi
+
+git init
+abb store *.tar*
+git add .abf.yml $P.spec
+git add *.patch &>/dev/null || :
+git add *.diff &>/dev/null || :
+git commit -am "Initial package"
+
+SUMMARY="$(grep ^Summary: $P.spec |head -n1 |cut -d: -f2- |xargs echo)"
+
+gh repo create --description "$SUMMARY" --public --push --source . OpenMandrivaAssociation/$P
+abf create_empty --description "$SUMMARY" --visibility public -v $P openmandriva
+# FIXME set Github organization properly in abf create_empty
+abf add -p openmandriva/$P cooker/main
+abf add -p openmandriva/$P rolling/main
+abf build -a aarch64 -a znver1 -a x86_64 -b master --auto-publish-status default --skip-personal --no-extra-tests --update-type enhancement -p openmandriva/$P
