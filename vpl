@@ -1,6 +1,6 @@
 #!/bin/bash
 # Spec file generator for perl modules
-# (c) 2000-2021 Bernhard Rosenkraenzer <bero@lindev.ch>
+# (c) 2000-2022 Bernhard Rosenkraenzer <bero@lindev.ch>
 
 NAME=`echo $1 |sed -e "s/\.spec$//"`
 if [ -z "$EDITOR" ]; then
@@ -14,29 +14,38 @@ ID="`cat /etc/passwd |grep "^$(id -un):" |cut -d: -f5` <`id -un`@`hostname |cut 
 [ -e ~/.vs ] && source ~/.vs
 [ -z "$ABFDIR" ] && ABFDIR=~/abf
 
-mkdir -p "$ABFDIR/$NAME"
-cd "$ABFDIR/$NAME"
+if echo $NAME |grep -q ^perl-; then
+	NAME="$(echo $NAME |cut -b6-)"
+fi
+if echo $NAME |grep -q ::; then
+	NAME="$(echo $NAME |sed -e 's,::,-,g')"
+fi
+
+mkdir -p "$ABFDIR/perl-$NAME"
+cd "$ABFDIR/perl-$NAME"
 if [ ! -e "perl-$NAME.spec" ]; then
 	cat >"perl-$NAME.spec" <<EOF
 %define module $NAME
+%undefine _debugsource_packages
 
-Name: perl-%{module}
-Version:
-Release: 1
-Summary:
-URL: https://metacpan.org/pod/%{module}
-Source: http://mirror.switch.ch/ftp/mirror/CPAN/authors/id/X/XX/XXX/%module/%{module}-%{version}.tar.gz
-License: Perl (Artistic or GPL)
-Group: Development/Languages
-BuildArch: noarch
+Name:		perl-%{module}
+Version:	
+Release:	1
+Summary:	
+URL:		https://metacpan.org/pod/$(echo $NAME |sed -e 's,-,::,g')
+Source:		https://cpan.org/modules/by-module/$(echo $NAME |cut -d- -f1)/%{module}-%{version}.tar.gz
+License:	Perl (Artistic or GPL)
+Group:		Development/Perl
+BuildRequires:	perl
+BuildArch:	noarch
 
 %description
 
 %prep
 %autosetup -p1 -n %{module}-%{version}
+perl Makefile.PL INSTALLDIRS=vendor
 
 %build
-%{__perl} Makefile.PL INSTALLDIRS=vendor
 %make_build
 
 %check
@@ -48,6 +57,7 @@ make test
 %files
 %doc Changes MANIFEST README
 %{perl_vendorlib}/*/*
+%{_mandir}/man3/*.3pm*
 EOF
 fi
 exec $EDITOR perl-"$NAME".spec
