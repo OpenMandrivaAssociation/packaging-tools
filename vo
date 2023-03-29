@@ -1,0 +1,168 @@
+#!/bin/bash
+# Spec file generator for Octave packages
+#
+
+BINARY=false
+while [ "`echo $1 |cut -b1`" = "-" ]; do
+	case "$1" in
+	-b|--binary)
+		BINARY=true
+		;;
+	esac
+	shift
+done
+
+NAME=`echo $1 |sed -e "s/\.spec$//"`
+if echo $NAME |grep -q '^octave-'; then
+	PNAME="$NAME"
+	NAME="`echo $NAME |cut -b8-`"
+else
+	PNAME="octave-$NAME"
+fi
+[ -z "$EDITOR" ] && EDITOR="$VISUAL"
+if [ -z "$EDITOR" ]; then
+	if [ -e /usr/bin/vim ]; then
+		EDITOR=/usr/bin/vim
+	fi
+fi
+ID="`cat /etc/passwd |grep "^$(id -un):" |cut -d: -f5` <`id -un`@`hostname |cut -d. -f2-`>"
+[ -e ~/.vs ] && source ~/.vs
+[ -z "$ABFDIR" ] && ABFDIR=~/abf
+
+#curl https://gnu-octave.github.io/packages/$NAME/
+curl https://raw.githubusercontent.com/gnu-octave/packages/main/packages/$NAME.yaml >/tmp/$NAME.$$
+if [ -e /tmp/$NAME.$$ ]; then
+	V=`grep -A 100 'versions:' /tmp/$NAME.$$ |grep -m1 "id:" |sed -ne 's|.*\"\(.*\)\"|\1|p'`
+	S=`grep -A 100 'description:' /tmp/$NAME.$$ |grep -m2 -B100 -v "^[[:space:]]" |sed '1d; $d'| xargs |fold -sw 70`
+	# SS -- short summary (newlines killed)
+	SS=`echo $S |cut -b-79 |cut -d\. -f-1`
+	L=`grep -A 100 'copyright' /tmp/$NAME.$$ |grep -m1 "label:"  |sed -ne 's|  label: \"\(.*\)\"|\1|p'`
+	U=`grep -A 1 '"repository"' /tmp/$NAME.$$ |sed  -ne 's|  url: \"\(.*\)\"|\1|p'`
+	s=`grep -A 100 "$V" /tmp/$NAME.$$ |grep -m1 -B100 "url:" |sed  -ne 's|  url: \"\(.*\)\"|\1|p' |head -n1 |sed -e "s|$V|%{version}|"`
+	while read dep
+	do
+		dep=`echo $dep |sed -e "s|(||;s|)||"`
+		if echo $dep |grep -q '^octave'; then
+			dep=`echo $dep |sed -e "s,octave,octave-devel,"`
+		elif test "$dep" == "pkg"; then
+			continue
+		else
+			dep=octave-$dep
+		fi
+		d="$d${dep}:"
+	done < <(grep -A100 'depends:' /tmp/$NAME.$$ |grep -m1 -B100 "^-" |grep "[[:space:]]-" |sed -ne 's|.*\"\(.*\)\"|\1|p')
+	rm -f /tmp/$NAME.$$
+fi
+[ -z "$L" ] && L="GPL"
+
+mkdir -p $ABFDIR/$PNAME
+if [ ! -e $ABFDIR/$PNAME/$PNAME.spec ]; then
+	cat >$ABFDIR/$PNAME/$PNAME.spec <<EOF
+%global octpkg $NAME
+
+Summary:	$SS
+Name:		$PNAME
+Version:	$V
+Release:	1
+License:	$L
+Group:		Sciences/Mathematics
+#Url:		https://packages.octave.org/$NAME/
+Url:		$U
+Source0:	$s
+
+EOF
+
+#BuildRequires:	octave-devel >= 8.1.0
+	echo $d |while read -d: dep
+	do
+		cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
+BuildRequires:  $dep
+EOF
+	done
+
+	cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
+
+Requires:	octave(api) = %{octave_api}
+EOF
+	echo $d |while read -d: dep
+	do
+		[[ "$dep" == *"octave-devel"* ]] && continue 
+		cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
+Requires:  	$dep
+EOF
+	done
+	
+	cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
+
+Requires(post): octave
+Requires(postun): octave
+
+EOF
+
+	if ! $BINARY; then
+		cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
+BuildArch:	noarch
+
+EOF
+	fi
+
+	cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
+%description
+$S
+
+EOF
+	cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
+%files
+%license COPYING
+%doc NEWS
+%dir %{octpkgdir}
+%{octpkgdir}/*
+EOF
+
+        if $BINARY; then
+                cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
+%dir %{octpkglibdir}
+%{octpkglibdir}/*
+EOF
+	fi
+	echo >> $ABFDIR/$PNAME/$PNAME.spec
+ 
+
+        cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
+#---------------------------------------------------------------------------
+
+%prep
+%autosetup -p1 -n %{octpkg}-%{version}
+
+%build
+EOF
+
+        if $BINARY; then
+		cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
+%set_build_flags
+EOF
+	fi
+
+	cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
+%octave_pkg_build
+
+%install
+%octave_pkg_install
+
+%check
+%octave_pkg_check
+
+%post
+%octave_cmd pkg rebuild
+
+%preun
+%octave_pkg_preun
+
+%postun
+%octave_cmd pkg rebuild
+
+EOF
+fi
+
+exec "$EDITOR" "$ABFDIR/$PNAME/$PNAME".spec
+
