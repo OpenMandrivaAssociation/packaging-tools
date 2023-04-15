@@ -36,7 +36,7 @@ if [ -e /tmp/$NAME.$$ ]; then
 	S=`grep -A 100 'description:' /tmp/$NAME.$$ |grep -m2 -B100 -v "^[[:space:]]" |sed '1d; $d'| xargs |fold -sw 70`
 	# SS -- short summary (newlines killed)
 	SS=`echo $S |cut -b-79 |cut -d\. -f-1`
-	L=`grep -A 100 'copyright' /tmp/$NAME.$$ |grep -m1 "label:"  |sed -ne 's|  label: \"\(.*\)\"|\1|p'`
+	L=`grep -A 100 'copyright' /tmp/$NAME.$$ |grep -m1 "label:"  |sed -ne 's|  label: \"\(.*\)\"|\1|p' |sed -e 's|GPL-\([[:digit:]]\).0-or-later|GPLv\1\+|'`
 	U=`grep -A 1 '"repository"' /tmp/$NAME.$$ |sed  -ne 's|  url: \"\(.*\)\"|\1|p'`
 	s=`grep -A 100 "$V" /tmp/$NAME.$$ |grep -m1 -B100 "url:" |sed  -ne 's|  url: \"\(.*\)\"|\1|p' |head -n1 |sed -e "s|$V|%{version}|g"`
 	while read dep
