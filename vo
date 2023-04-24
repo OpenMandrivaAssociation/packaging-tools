@@ -123,6 +123,7 @@ EOF
                 cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
 %dir %{octpkglibdir}
 %{octpkglibdir}/*
+%{_metainfodir}/*.metainfo.xml
 EOF
 	fi
 	echo >> $ABFDIR/$PNAME/$PNAME.spec
