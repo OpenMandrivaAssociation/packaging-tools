@@ -1,0 +1,37 @@
+.TH xc 1 "May  3, 2023" "OpenMandriva" "Developer Tools"
+.SH NAME
+xc \- crosscompile a package
+.SH SYNOPSIS
+.br
+.B xc
+<target>
+.SH DESCRIPTION
+\fBxc\fR ("cross compile") is a simple script for crosscompiling
+packages that are in an abb/abf-console-client style checkout
+(spec file and sources in one directory, build results will be
+put in subdirectories in the same directory structure).
+.PP
+If \fBtarget\fR is specified, the package will be crosscompiled for
+the given target - otherwise, it will be built for riscv64.
+.PP
+\fBxc\fR assumes the crosscompiler and related libraries are
+already installed. If \fBxc\fR fails on something like "cannot
+create executables", you may have to install the
+\fBcross-TARGET-binutils\fR, \fBcross-TARGET-gcc\fR, and
+\fBcross-TARGET-libc\fR packages (where TARGET is the long
+form triplet of your target, e.g. \fBriscv64-openmandriva-linux-gnu\fR).
+.SH EXAMPLE
+.SP
+.NF
+  $ co xz
+.br
+  $ xc
+.FI
+.PD
+.SH "SEE ALSO"
+.BR rpmbuild (8)
+
+.SH AUTHOR
+.nf
+Bernhard Rosenkraenzer <bero@lindev.ch>
+.fi
