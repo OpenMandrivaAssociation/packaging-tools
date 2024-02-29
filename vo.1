@@ -7,8 +7,9 @@ vo \- simple RPM spec file generator for packages for GNU Octave
 [-b|--binary]
 <app>
 .SH OPTIONS
+TP.
 .BI \-b\fR,\ \fB\-\-binary
-Create an octave package depending on atch 
+Create an octave package depending on arch
 .SH DESCRIPTION
 \fBvo\fR is a simple generator for RPM spec files (the
 files controlling the build process of RPM packages) packaging octave packages.
@@ -20,7 +21,7 @@ variables) to edit the file.
 All you need to do is fill in the blanks and possibly overwrite some default
 settings.
 .PP
-If you are trying to package something not related to Java, \fBvs (1)\fR and
+If you are trying to package something not related to Octave, \fBvs (1)\fR and
 \fBvl\fR are preferrable over \fBvo\fR.
 .SH EXAMPLE
 .SP
@@ -42,6 +43,8 @@ If you are trying to package something not related to Java, \fBvs (1)\fR and
 .BR e (1)
 
 .SH AUTHOR
+.nf
+Bernhard Rosenkraenzer <bero@lindev.ch>
 .nf
 mandian <mandian@tutanota.com>
 .fi
