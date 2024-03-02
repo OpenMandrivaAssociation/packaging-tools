@@ -96,7 +96,7 @@ EOF
 	fi
 	cat >>"$NAME.spec" <<EOF
 %global forgeurl	$URL
-Version:			
+Version:		
 
 %gometa
 
@@ -222,7 +222,6 @@ done
 EOF
 	if [ -n "$ALTGOIPATHS" ]; then
 		cat >>"$NAME.spec" <<EOF
-
 # install alternative name
 ln -fs . %{buildroot}%{_datadir}/gocode/src/%{goaltipaths}
 echo \"%{_datadir}/gocode/src/%{goaltipaths}\" >> devel.file-list
