@@ -1,0 +1,67 @@
+.TH vlgo 1 "Feb 34, 2024" "OpenMandriva" "Developer Tools"
+.SH NAME
+vlgo \- simple RPM spec file editor for GoLang libraries
+.SH SYNOPSIS
+.br
+.B vlgo
+[-u|--url] [-b|--bootstrap] [-d|--devel] [-s|--snapshot]
+<app>
+.SH OPTIONS
+.TP
+.BI \-u\fR,\ \fB\-\-url
+Use the provides url
+.TP
+.BI \-a\fR,\ \fB\-\-altgoipaths
+Add an alternative GOIPATH.
+.TP
+.BI \-b\fR,\ \fB\-\-bootstrap
+Create a bootsrapped package.
+.TP
+.BI \-d\fR,\ \fB\-\-devel
+Add devel package.
+.TP
+.BI \-g\fR,\ \fB\-\-goipath
+Use provides GOIPATH instead of get it from the URL.
+.TP
+.BI \-s\fR,\ \fB\-\-snapshot
+Create constructs to allow building an SCM snapshot
+.SH DESCRIPTION
+\fBvlgo\fR is a simple generator for RPM spec files (the
+files controlling the build process of RPM packages) packaging Golang
+module packages.
+.PP
+\fBvlgo\fR creates a spec file template, and invokes an editor (usually
+\fBvim\fR, but \fBvlgo\fR respects the \fBEDITOR\fR and \fBVISUAL\fR environment
+variables) to edit the file.
+.PP
+All you need to do is fill in the blanks and possibly overwrite some default
+settings.
+.PP
+If you are trying to package something not related to Golang, \fBvs (1)\fR and
+\fBvl\fR are preferrable over \fBvlgo\fR.
+.SH EXAMPLE
+.SP
+.NF
+  $ vlgo -u somepackage_url
+.br
+  $ cd ~/abf/golang-somepackage
+.br
+  $ abb build
+.FI
+.PD
+.SH "SEE ALSO"
+.BR rpm (8),
+.BR vs (1),
+.BR vl (1),
+.BR vj (1),
+.BR vo (1),
+.BR vp (1),
+.BR vpl (1),
+.BR e (1)
+
+.SH AUTHOR
+.nf
+Bernhard Rosenkraenzer <bero@lindev.ch>
+.nf
+mandian <mandian@tutanota.com>
+.fi
