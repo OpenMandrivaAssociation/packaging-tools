@@ -11,6 +11,7 @@ while [ "`echo $1 |cut -b1`" = "-" ]; do
 	-a|--altgoipaths)
 		ALTGOIPATHS="$2"
 		shift
+		;;
 	-b|--bootstrap)
 		BOOTSTRAP=true
 		;;
