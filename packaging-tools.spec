@@ -4,7 +4,7 @@ Version:	2.1.6
 Release:	1
 License:	Public Domain
 Group:		Development/Other
-Url:		http://openmandriva.org/
+Url:		https://openmandriva.org/
 Source0:	e
 Source1:	e.1
 Source2:	vs
