@@ -1,6 +1,6 @@
 Summary:	Tools that make packagers' lives easier
 Name:		packaging-tools
-Version:	2.1.6
+Version:	2.2.0
 Release:	1
 License:	Public Domain
 Group:		Development/Other
@@ -27,6 +27,7 @@ Source18:	packaging-tools.sh
 Source19:	co.1
 Source20:	xc
 Source21:	xc.1
+Source22:	add-to-om
 BuildArch:	noarch
 Requires:	abb
 Requires:	abf-console-client
@@ -43,7 +44,7 @@ Some tools that make packagers' lives easier.
 
 %install
 mkdir -p %{buildroot}%{_bindir} %{buildroot}%{_mandir}/man1 %{buildroot}%{_sysconfdir}/profile.d
-install -c -m 755 %SOURCE0 %SOURCE2 %SOURCE4 %SOURCE6 %SOURCE8 %SOURCE10 %SOURCE12 %SOURCE14 %SOURCE16 %SOURCE20 %{buildroot}%{_bindir}/
+install -c -m 755 %SOURCE0 %SOURCE2 %SOURCE4 %SOURCE6 %SOURCE8 %SOURCE10 %SOURCE12 %SOURCE14 %SOURCE16 %SOURCE20 %SOURCE22 %{buildroot}%{_bindir}/
 install -c -m 644 %SOURCE1 %SOURCE3 %SOURCE5 %SOURCE7 %SOURCE9 %SOURCE11 %SOURCE13 %SOURCE15 %SOURCE17 %SOURCE19 %SOURCE21 %{buildroot}%{_mandir}/man1/
 install -c -m 644 %SOURCE18 %{buildroot}%{_sysconfdir}/profile.d/99packaging-tools.sh
 

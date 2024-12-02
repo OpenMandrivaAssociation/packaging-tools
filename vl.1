@@ -4,21 +4,31 @@ vs \- simple RPM spec file editor for libraries
 .SH SYNOPSIS
 .br
 .B vl
-[-c|--cmake] [-s|--snapshot] [-S|--static]
+[-a|--autotools] [-b|--buildsys] [-c|--cmake] [-C|--custom-buildsys] [-m|--meson] [-s|--snapshot] [-S|--static]
 <app>
 .SH OPTIONS
 .TP
+.BI \-a\fR,\ \fB\-\-autotools\fR,\ \fB\-\-autoconf
+Create a template for a project using autoconf (short for -b autoconf)
+.TP
+.BI \-b\fR,\ \fB\-\-buildsys X
+Create a template using the X build system (where X is a build system supported
+by declarative rpm macros)
+.TP
 .BI \-c\fR,\ \fB\-\-cmake
-Create a template for a project using cmake rather than autoconf
+Create a template for a project using cmake (this is the default)
+.TP
+.BI \-C\fR,\ \fB\-\-custom-buildsys
+Create a template for a custom build system (not supported by declarative rpm macros)
+.TP
+.BI \-m\fR,\ \fB\-\-meson
+Create a template for a project using meson
 .TP
 .BI \-s\fR,\ \fB\-\-snapshot
 Create constructs to allow building an SCM snapshot
 .TP
 .BI \-S\fR,\ \fB\-\-static
 Create subpackage for a static library
-.TP
-.BI \-t\fR,\ \fB\-\-track
-Create a %track section
 .SH DESCRIPTION
 \fBvl\fR is a simple generator for RPM spec files (the files controlling the
 build process of RPM packages) for libraries.

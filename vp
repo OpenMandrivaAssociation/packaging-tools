@@ -86,7 +86,8 @@ License:	$L
 Group:		Development/Python
 EOF
 	cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
-BuildRequires:	python%{pyver}dist(pip)
+BuildRequires:	python
+BuildSystem:	python
 BuildArch:	noarch
 
 %description
@@ -103,12 +104,6 @@ EOF
 		echo "%autosetup -p1 -n $NAME-%{version}" >>$ABFDIR/$PNAME/$PNAME.spec
 	fi
 	cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
-
-%build
-%py_build
-
-%install
-%py_install
 
 %files
 %{py_sitedir}/$NAME
