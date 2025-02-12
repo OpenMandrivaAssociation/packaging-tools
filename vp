@@ -28,6 +28,12 @@ ID="`cat /etc/passwd |grep "^$(id -un):" |cut -d: -f5` <`id -un`@`hostname |cut 
 [ -z "$ABFDIR" ] && ABFDIR=~/abf
 
 curl https://pypi.org/pypi/$NAME/json >/tmp/$NAME.$$
+if cat /tmp/$NAME.$$ |grep -q '"message": "Not Found"'; then
+	rm /tmp/$NAME.$$
+	NAME="python-$NAME"
+	set -x
+	curl https://pypi.org/pypi/$NAME/json >/tmp/$NAME.$$
+fi
 if [ -e /tmp/$NAME.$$ ]; then
 	V=`cat /tmp/$NAME.$$ |python -c "import sys,json; print(json.load(sys.stdin)['info']['version']);"`
 	S=`cat /tmp/$NAME.$$ |python -c "import sys,json; print(json.load(sys.stdin)['info']['summary']);"`
@@ -92,18 +98,6 @@ BuildArch:	noarch
 
 %description
 $S
-
-%prep
-EOF
-
-	if $SNAPSHOT; then
-		cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
-%autosetup -p1 -n ${NAME}%{!?scmrev:-%{version}%{?beta:%{beta}}}
-EOF
-	else
-		echo "%autosetup -p1 -n $NAME-%{version}" >>$ABFDIR/$PNAME/$PNAME.spec
-	fi
-	cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
 
 %files
 %{py_sitedir}/$NAME
