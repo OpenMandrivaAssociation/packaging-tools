@@ -101,7 +101,7 @@ $S
 
 %files
 %{py_sitedir}/$NAME
-%{py_sitedir}/${NAME/-/_}-*.*-info
+%{py_sitedir}/${NAME//-/_}-*.*-info
 EOF
 fi
 exec "$EDITOR" "$ABFDIR/$PNAME/$PNAME".spec
