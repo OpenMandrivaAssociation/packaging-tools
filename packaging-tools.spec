@@ -1,6 +1,6 @@
 Summary:	Tools that make packagers' lives easier
 Name:		packaging-tools
-Version:	2.2.0
+Version:	2.2.1
 Release:	1
 License:	Public Domain
 Group:		Development/Other
@@ -19,15 +19,17 @@ Source10:	vp
 Source11:	vp.1
 Source12:	vpl
 Source13:	vpl.1
-Source14:	build
-Source15:	build.1
-Source16:	b
-Source17:	b.1
-Source18:	packaging-tools.sh
-Source19:	co.1
-Source20:	xc
-Source21:	xc.1
-Source22:	add-to-om
+Source14:	vgo
+Source15:	vgo.1
+Source16:	build
+Source17:	build.1
+Source18:	b
+Source19:	b.1
+Source20:	packaging-tools.sh
+Source21:	co.1
+Source22:	xc
+Source23:	xc.1
+Source24:	add-to-om
 BuildArch:	noarch
 Requires:	abb
 Requires:	abf-console-client
@@ -44,9 +46,9 @@ Some tools that make packagers' lives easier.
 
 %install
 mkdir -p %{buildroot}%{_bindir} %{buildroot}%{_mandir}/man1 %{buildroot}%{_sysconfdir}/profile.d
-install -c -m 755 %SOURCE0 %SOURCE2 %SOURCE4 %SOURCE6 %SOURCE8 %SOURCE10 %SOURCE12 %SOURCE14 %SOURCE16 %SOURCE20 %SOURCE22 %{buildroot}%{_bindir}/
-install -c -m 644 %SOURCE1 %SOURCE3 %SOURCE5 %SOURCE7 %SOURCE9 %SOURCE11 %SOURCE13 %SOURCE15 %SOURCE17 %SOURCE19 %SOURCE21 %{buildroot}%{_mandir}/man1/
-install -c -m 644 %SOURCE18 %{buildroot}%{_sysconfdir}/profile.d/99packaging-tools.sh
+install -c -m 755 %SOURCE0 %SOURCE2 %SOURCE4 %SOURCE6 %SOURCE8 %SOURCE10 %SOURCE12 %SOURCE14 %SOURCE16 %SOURCE18 %SOURCE22 %SOURCE24 %{buildroot}%{_bindir}/
+install -c -m 644 %SOURCE1 %SOURCE3 %SOURCE5 %SOURCE7 %SOURCE9 %SOURCE11 %SOURCE13 %SOURCE15 %SOURCE17 %SOURCE19 %SOURCE21 %SOURCE23 %{buildroot}%{_mandir}/man1/
+install -c -m 644 %SOURCE20 %{buildroot}%{_sysconfdir}/profile.d/99packaging-tools.sh
 
 %files
 %{_bindir}/*
