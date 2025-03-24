@@ -9,10 +9,23 @@ if ! [ -e $P.spec ]; then
 fi
 
 git init
-abb store *.tar*
-git add .abf.yml $P.spec
+ls *.tar* &>/dev/null && abb store *.tar*
+ls *.tbz* &>/dev/null && abb store *.tbz*
+ls *.tgz* &>/dev/null && abb store *.tgz*
+ls *.txz* &>/dev/null && abb store *.txz*
+ls *.zip &>/dev/null && abb store *.zip
+ls *.7z &>/dev/null && abb store *.7z
+ls *.crate &>/dev/null && abb store *.crate
+ls *.jar &>/dev/null && abb store *.jar
+git add $P.spec
+git add .abf.yml &>/dev/null || :
 git add *.patch &>/dev/null || :
 git add *.diff &>/dev/null || :
+git add *.txt &>/dev/null || :
+git add *.sh &>/dev/null || :
+git add *.md &>/dev/null || :
+git add *.json &>/dev/null || :
+git add *.rpmlintrc &>/dev/null || :
 git commit -am "Initial package"
 
 SUMMARY="$(grep ^Summary: $P.spec |head -n1 |cut -d: -f2- |xargs echo)"

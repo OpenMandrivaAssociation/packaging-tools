@@ -1,22 +1,46 @@
 #!/bin/bash
+# Spec file generator
+# (c) 2000-2024 Bernhard Rosenkraenzer <bero@lindev.ch>
 
 SNAPSHOT=false
-CMAKE=false
-MESON=false
 while [ "`echo $1 |cut -b1`" = "-" ]; do
 	case "$1" in
 	-s|--snapshot)
 		SNAPSHOT=true
 		;;
+	-a|--autotools|--autoconf)
+		BUILDSYS=autotools
+		;;
+	-b|--buildsys)
+		shift
+		BUILDSYS="$1"
+		;;
 	-c|--cmake)
-		CMAKE=true
+		BUILDSYS=cmake
+		;;
+	-C|--custom-buildsys)
+		BUILDSYS=custom
 		;;
 	-m|--meson)
-		MESON=true
+		BUILDSYS=meson
 		;;
 	esac
 	shift
 done
+
+[ -z "$BUILDSYS" ] && BUILDSYS=cmake
+
+case $BUILDSYS in
+autotools)
+	BSDEP="autoconf automake slibtool"
+	;;
+custom)
+	BSDEP=""
+	;;
+*)
+	BSDEP="$BUILDSYS"
+	;;
+esac
 
 NAME=`echo $1 |sed -e "s/\.spec$//"`
 [ -z "$EDITOR" ] && EDITOR="$VISUAL"
@@ -40,45 +64,45 @@ if [ ! -e "$NAME.spec" ]; then
 EOF
 	fi
 	cat >>"$NAME.spec" <<EOF
-Name: $NAME
-Version:
+Name:		$NAME
+Version:	
 EOF
 
 	if $SNAPSHOT; then
 		cat >>"$NAME.spec" <<EOF
 %if "%{beta}" == ""
 %if "%{scmrev}" == ""
-Release: 1
-Source0: %{name}-%{version}.tar.xz
+Release:	1
+Source0:	%{name}-%{version}.tar.xz
 %else
-Release: 0.%{scmrev}.1
-Source0: %{name}-%{scmrev}.tar.xz
+Release:	0.%{scmrev}.1
+Source0:	%{name}-%{scmrev}.tar.xz
 %endif
 %else
 %if "%{scmrev}" == ""
-Release: 0.%{beta}.1
-Source0: %{name}-%{version}%{beta}.tar.xz
+Release:	0.%{beta}.1
+Source0:	%{name}-%{version}%{beta}.tar.xz
 %else
-Release: 0.%{beta}.0.%{scmrev}.1
-Source0: %{name}-%{scmrev}.tar.xz
+Release:	0.%{beta}.0.%{scmrev}.1
+Source0:	%{name}-%{scmrev}.tar.xz
 %endif
 %endif
 EOF
 	else
 		cat >>"$NAME.spec" <<EOF
-Release: 1
-Source0: https://github.com/$NAME/$NAME/archive/%{version}/%{name}-%{version}.tar.gz
+Release:	1
+Source0:	https://github.com/$NAME/$NAME/archive/%{version}/%{name}-%{version}.tar.gz
 EOF
 	fi
 
 	cat >>"$NAME.spec" <<EOF
-Summary:
-URL: https://github.com/$NAME/$NAME
-License: GPL
-Group:
+Summary:	
+URL:		https://github.com/$NAME/$NAME
+License:	GPL
+Group:		
 EOF
-	$CMAKE && echo 'BuildRequires: cmake ninja' >>"$NAME.spec"
-	$MESON && echo 'BuildRequires: meson ninja' >>"$NAME.spec"
+	[ -n "$BSDEP" ] && echo "BuildRequires:	$BSDEP" >>"$NAME.spec"
+	[ "$BUILDSYS" != "custom" ] && echo "BuildSystem:	$BUILDSYS" >>"$NAME.spec"
 	cat >>"$NAME.spec" <<EOF
 
 %description
@@ -93,33 +117,23 @@ EOF
 	else
 		echo '%autosetup -p1' >>"$NAME.spec"
 	fi
-	if $CMAKE; then
-		echo "%cmake -G Ninja" >>"$NAME.spec"
-	elif $MESON; then
-		echo "%meson" >>"$NAME.spec"
-	else
-		echo "%configure" >>"$NAME.spec"
-	fi
-	if $CMAKE || $MESON; then
-		BUILDTOOL=ninja
-		MAKEARGS="$MAKEARGS -C build"
-	else
-		BUILDTOOL=make
-	fi
-	cat >>"$NAME.spec" <<EOF
+
+	if [ "$BUILDSYS" = "custom" ]; then
+		cat >>"$NAME.spec" <<EOF
+
+%conf
 
 %build
-%${BUILDTOOL}_build$MAKEARGS
+%make_build
 
 %install
-%${BUILDTOOL}_install$MAKEARGS
+%make_install
+EOF
+	fi
+
+	cat >>"$NAME.spec" <<EOF
 
 %files
-# Leaving the "/" in here is _BAD_, but will generally work [packaging all
-# files] for testing.
-# Please replace it with an actual file list to prevent your package from
-# owning all system directories.
-/
 EOF
 fi
 exec "$EDITOR" "$NAME".spec

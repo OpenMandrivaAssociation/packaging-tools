@@ -4,24 +4,47 @@
 
 STATIC=false
 SNAPSHOT=false
-CMAKE=false
-TRACK=false
-for i in "$@"; do
-	if [ "`echo $i |cut -b1`" = "-" ]; then
-		case $i in
-		-c|--cmake)
-			CMAKE=true
-			;;
-		-s|--snapshot)
-			SNAPSHOT=true
-			;;
-		-S|--static)
-			STATIC=true
-			;;
-		esac
+while [ "`echo $1 |cut -b1`" = "-" ]; do
+	case "$1" in
+	-s|--snapshot)
+		SNAPSHOT=true
+		;;
+	-a|--autotools|--autoconf)
+		BUILDSYS=autotools
+		;;
+	-b|--buildsys)
 		shift
-	fi
+		BUILDSYS="$1"
+		;;
+	-c|--cmake)
+		BUILDSYS=cmake
+		;;
+	-C|--custom-buildsys)
+		BUILDSYS=custom
+		;;
+	-m|--meson)
+		BUILDSYS=meson
+		;;
+	-S|--static)
+		STATIC=true
+		;;
+	esac
+	shift
 done
+
+[ -z "$BUILDSYS" ] && BUILDSYS=cmake
+
+case $BUILDSYS in
+autotools)
+	BSDEP="autoconf automake slibtool"
+	;;
+custom)
+	BSDEP=""
+	;;
+*)
+	BSDEP="$BUILDSYS"
+	;;
+esac
 
 if [ -z "$1" ]; then
 	exit 1
@@ -63,58 +86,59 @@ EOF
 
 	cat >>$NAME.spec <<EOF
 
-Name: $NAME
-Version:
+Name:		$NAME
+Version:	
 EOF
 
 	if $SNAPSHOT; then
 		cat >>$NAME.spec <<EOF
 %if "%{beta}" == ""
 %if "%{scmrev}" == ""
-Release: 1
-Source: %{name}-%{version}.tar.bz2
+Release:	1
+Source:		%{name}-%{version}.tar.bz2
 %else
-Release: 0.%{scmrev}.1
-Source: %{name}-%{scmrev}.tar.xz
+Release:	0.%{scmrev}.1
+Source:		%{name}-%{scmrev}.tar.xz
 %endif
 %else
 %if "%{scmrev}" == ""
-Release: 0.%{beta}.1
-Source: %{name}-%{version}%{beta}.tar.bz2
+Release:	0.%{beta}.1
+Source:		%{name}-%{version}%{beta}.tar.bz2
 %else
-Release: 0.%{beta}.%{scmrev}.1
-Source: %{name}-%{scmrev}.tar.xz
+Release:	0.%{beta}.%{scmrev}.1
+Source:		%{name}-%{scmrev}.tar.xz
 %endif
 %endif
 EOF
 	else
 		cat >>$NAME.spec <<EOF
-Release: 1
-Source0: https://github.com/$NAME/$NAME/archive/%{version}/%{name}-%{version}.tar.gz
+Release:	1
+Source0:	https://github.com/$NAME/$NAME/archive/%{version}/%{name}-%{version}.tar.gz
 EOF
 	fi
 
 	cat >>$NAME.spec <<EOF
-Summary:
-URL: https://github.com/$NAME/$NAME
-License: GPL
-Group: System/Libraries
+Summary:	
+URL:		https://github.com/$NAME/$NAME
+License:	GPL
+Group:		System/Libraries
 EOF
-	$CMAKE && echo 'BuildRequires: cmake' >>$NAME.spec
+	[ -n "$BSDEP" ] && echo "BuildRequires:	$BSDEP" >>$NAME.spec
+	[ "$BUILDSYS" != "custom" ] && echo "BuildSystem:	$BUILDSYS" >>$NAME.spec
 	cat >>$NAME.spec <<EOF
 
 %description
 
 %package -n %{libname}
-Summary:
-Group: System/Libraries
+Summary:	
+Group:		System/Libraries
 
 %description -n %{libname}
 
 %package -n %{devname}
-Summary: Development files for %{name}
-Group: Development/C
-Requires: %{libname} = %{EVRD}
+Summary:	Development files for %{name}
+Group:		Development/C
+Requires:	%{libname} = %{EVRD}
 
 %description -n %{devname}
 Development files (Headers etc.) for %{name}.
@@ -124,9 +148,9 @@ EOF
 		cat >>$NAME.spec <<EOF
 
 %package -n %{staticname}
-Summary: Static libraries for linking to %{name}
-Group: Development/C
-Requires: %{devname} = %{EVRD}
+Summary:	Static libraries for linking to %{name}
+Group:		Development/C
+Requires:	%{devname} = %{EVRD}
 
 %description -n %{staticname}
 Static libraries for linking to %{name}.
@@ -156,20 +180,20 @@ EOF
 EOF
 	fi
 
-	if $CMAKE; then
-		echo "%cmake" >>$NAME.spec
-		MAKEARGS=" -C build"
-	else
-		echo "%configure" >>$NAME.spec
-		MAKEARGS=""
-	fi
-	cat >>$NAME.spec <<EOF
+	if [ "$BUILDSYS" = "custom" ]; then
+		cat >>$NAME.spec <<EOF
+
+%conf
 
 %build
-%make_build$MAKEARGS
+%make_build
 
 %install
-%make_install$MAKEARGS
+%make_install
+EOF
+	fi
+
+	cat >>$NAME.spec <<EOF
 
 %files
 %{_bindir}/*
@@ -182,7 +206,7 @@ EOF
 %{_libdir}/*.so
 %{_libdir}/pkgconfig/*
 EOF
-	if $CMAKE; then
+	if [ "$BUILDSYS" = "cmake" ]; then
 		echo '%{_libdir}/cmake/*' >>$NAME.spec
 	fi
 

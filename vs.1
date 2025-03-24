@@ -4,17 +4,29 @@ vs \- simple RPM spec file generator
 .SH SYNOPSIS
 .br
 .B vs
+[-a|--autotools]
+[-b|--buildsys X]
 [-c|--cmake]
+[-C|--custom-buildsys]
 [-m|--meson]
 [-s|--snapshot]
 <app>
 .SH OPTIONS
 .TP
+.BI \-a\fR,\ \fB\-\-autotools
+Short for \-b autotools\fR
+.TP
+.BI \-b\fR,\ \fB\-\-buildsys X
+Specify the buildsystem being used in the subsequent parameter (default: cmake)
+.TP
 .BI \-c\fR,\ \fB\-\-cmake
-Create a template for a project using cmake rather than autoconf
+Short for \-b cmake\fR
+.TP
+.BI \-C\fR,\ \fB\-\-custom-buildsys
+Use a custom build system not supported by declarative rpm macros
 .TP
 .BI \-m\fR,\ \fB\-\-meson
-Create a template for a project using meson rather than autoconf
+Short for \-b meson\fR
 .TP
 .BI \-s\fR,\ \fB\-\-snapshot
 Create constructs to allow building an SCM snapshot
