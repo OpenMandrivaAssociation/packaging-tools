@@ -265,9 +265,9 @@ EOF
 		cat >>"golang-package-dependencies.sh" <<EOF
 #!/bin/sh
 # Needed for second stage bootstrapping (first stage bootstrap is installing
-# from the binary package): This script builds maven in online mode, creating
-# a local repository with all the dependencies (including those that need to
-# be built with maven).
+# from the binary package): This script builds the go library in online mode,
+# creating a local repository with all the dependencies (including those that
+# need to be built with go).
 #
 # (c) 2020 Bernhard Rosenkraenzer <bero@lindev.ch>
 # (c) 2024 mandian <mandian@tutanota.com>
