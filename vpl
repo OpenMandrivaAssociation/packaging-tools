@@ -1,63 +1,304 @@
 #!/bin/bash
 # Spec file generator for perl modules
-# (c) 2000-2022 Bernhard Rosenkraenzer <bero@lindev.ch>
+# (c) 2000-2026 Bernhard Rosenkraenzer <bero@lindev.ch>
+
+SNAPSHOT=false
+while [ "`echo $1 |cut -b1`" = "-" ]; do
+	case "$1" in
+	-s|--snapshot)
+		SNAPSHOT=true
+		;;
+	esac
+	shift
+done
 
 NAME=`echo $1 |sed -e "s/\.spec$//"`
+if echo "$NAME" |grep -q '^perl-'; then
+	NAME="$(echo $NAME |cut -b6-)"
+fi
+if echo "$NAME" |grep -q ::; then
+	NAME="$(echo $NAME |sed -e 's,::,-,g')"
+fi
+NAME="$(echo $NAME |sed -e 's/\.pm$//')"
+
+[ -z "$EDITOR" ] && EDITOR="$VISUAL"
 if [ -z "$EDITOR" ]; then
 	if [ -e /usr/bin/vim ]; then
 		EDITOR=/usr/bin/vim
-	else
-		EDITOR=/bin/vi
 	fi
 fi
 ID="`cat /etc/passwd |grep "^$(id -un):" |cut -d: -f5` <`id -un`@`hostname |cut -d. -f2-`>"
 [ -e ~/.vs ] && source ~/.vs
 [ -z "$ABFDIR" ] && ABFDIR=~/abf
 
-if echo $NAME |grep -q ^perl-; then
-	NAME="$(echo $NAME |cut -b6-)"
-fi
-if echo $NAME |grep -q ::; then
-	NAME="$(echo $NAME |sed -e 's,::,-,g')"
+# Pull release metadata from MetaCPAN, the way vp does from PyPI
+TMP=/tmp/vpl.$$
+curl "https://fastapi.metacpan.org/v1/release/$NAME" >"$TMP"
+if ! python -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d.get('version') else 1)" "$TMP" 2>/dev/null; then
+	# Case-insensitive / module-name fallback via autocomplete
+	DIST=`curl -sS --get "https://fastapi.metacpan.org/v1/search/autocomplete" --data-urlencode "q=$NAME" | python -c "
+import json,sys
+q=sys.argv[1]
+qdist=q.replace('::','-')
+qmod=q.replace('-','::')
+d=json.load(sys.stdin)
+cands=[]
+for h in d.get('hits',{}).get('hits',[]):
+	f=h.get('fields',h)
+	cands.append((f.get('distribution') or '', f.get('documentation') or ''))
+for dist,doc in cands:
+	if dist.lower()==qdist.lower():
+		print(dist); sys.exit(0)
+for dist,doc in cands:
+	if doc.lower() in (qmod.lower(), qdist.lower(), q.lower()):
+		print(dist); sys.exit(0)
+if cands:
+	print(cands[0][0])
+" "$NAME"`
+	if [ -n "$DIST" ]; then
+		curl "https://fastapi.metacpan.org/v1/release/$DIST" >"$TMP"
+		if python -c "import json,sys; d=json.load(open(sys.argv[1])); sys.exit(0 if d.get('version') else 1)" "$TMP" 2>/dev/null; then
+			NAME="$DIST"
+		fi
+	fi
 fi
 
-mkdir -p "$ABFDIR/perl-$NAME"
-cd "$ABFDIR/perl-$NAME"
-if [ ! -e "perl-$NAME.spec" ]; then
-	cat >"perl-$NAME.spec" <<EOF
+V=; S=; L=; U=; SRC=; MAIN=; DEPS=
+if [ -e "$TMP" ]; then
+	eval "$(python - "$TMP" <<'PY'
+import json, sys
+
+def sh(v):
+	return "'" + str(v if v is not None else "").replace("'", "'\\''") + "'"
+
+licmap = {
+	"perl_5": "GPL+ or Artistic",
+	"artistic_1": "Artistic",
+	"artistic_2": "Artistic-2.0",
+	"mit": "MIT",
+	"apache_2_0": "Apache-2.0",
+	"apache_1_1": "Apache-1.1",
+	"gpl_1": "GPLv1+",
+	"gpl_2": "GPLv2+",
+	"gpl_3": "GPLv3+",
+	"lgpl_2_1": "LGPLv2.1+",
+	"lgpl_3_0": "LGPLv3+",
+	"bsd": "BSD",
+	"freebsd": "BSD",
+	"zlib": "zlib",
+	"mozilla_1_0": "MPLv1.0",
+	"mozilla_1_1": "MPLv1.1",
+	"openssl": "OpenSSL",
+}
+
+try:
+	d = json.load(open(sys.argv[1]))
+except Exception:
+	sys.exit(0)
+if not d.get("version"):
+	sys.exit(0)
+
+ver = str(d.get("version") or "")
+abstract = d.get("abstract") or ""
+dist = d.get("distribution") or ""
+main = d.get("main_module") or dist.replace("-", "::")
+src = d.get("download_url") or ""
+if ver and ver in src:
+	src = src.replace(ver, "%{version}", 1)
+
+licenses = d.get("license") or []
+if isinstance(licenses, str):
+	licenses = [licenses]
+mapped = []
+for lic in licenses:
+	item = licmap.get(lic, lic)
+	if item and item != "unknown" and item not in mapped:
+		mapped.append(item)
+license = " or ".join(mapped)
+
+res = d.get("resources") or {}
+url = res.get("homepage") or (res.get("repository") or {}).get("web") or ""
+if not url:
+	url = "https://metacpan.org/dist/%s" % dist if dist else ""
+
+print("V=" + sh(ver))
+print("S=" + sh(abstract))
+print("L=" + sh(license))
+print("U=" + sh(url))
+print("SRC=" + sh(src))
+print("MAIN=" + sh(main))
+if dist:
+	print("NAME=" + sh(dist))
+
+skip = {
+	"perl",
+	"strict", "warnings", "vars", "base", "lib", "utf8", "bytes", "integer",
+	"constant", "overload", "overloading", "feature", "if", "mro", "builtin",
+	"experimental", "locale", "sigtrap", "subs", "sort", "open",
+	"Config", "DynaLoader", "XSLoader", "Errno", "Fcntl", "POSIX",
+	"Symbol", "SelectSaver", "AutoLoader", "blib",
+}
+zero = {"", "0", "0.0", "0.00", "0.000", "0.0000"}
+phases = {"configure", "build", "runtime", "test"}
+best = {}
+for dep in d.get("dependency") or []:
+	if dep.get("phase") not in phases:
+		continue
+	if dep.get("relationship") != "requires":
+		continue
+	mod = dep.get("module") or ""
+	if not mod or mod in skip:
+		continue
+	verdep = str(dep.get("version") or "0")
+	prev = best.get(mod)
+	if prev is None:
+		best[mod] = verdep
+	elif prev in zero and verdep not in zero:
+		best[mod] = verdep
+lines = []
+for mod in sorted(best, key=str.lower):
+	if mod == "ExtUtils::MakeMaker":
+		continue
+	verdep = best[mod]
+	if verdep not in zero:
+		lines.append("BuildRequires:\tperl(%s) >= %s" % (mod, verdep))
+	else:
+		lines.append("BuildRequires:\tperl(%s)" % mod)
+print("DEPS=" + sh("\n".join(lines)))
+PY
+)"
+	# Longer %description from the module's POD, falling back to the abstract
+	if [ -n "$MAIN" ]; then
+		curl -sS "https://fastapi.metacpan.org/v1/pod/${MAIN}?content-type=text/plain" >"$TMP.pod"
+		DESC=`python - "$TMP.pod" <<'PY'
+import re, sys
+try:
+	text = open(sys.argv[1], encoding="utf-8", errors="replace").read()
+except Exception:
+	sys.exit(0)
+m = re.search(r"(?ms)^DESCRIPTION\s*\n(.*?)(?=\n[A-Z][A-Z0-9 /.+-]{2,}\s*$|\Z)", text)
+if not m:
+	sys.exit(0)
+body = m.group(1)
+lines = []
+for line in body.splitlines():
+	if line.startswith("    "):
+		line = line[4:]
+	lines.append(line.rstrip())
+body = "\n".join(lines).strip()
+body = re.sub(r"L<([^|>]+)(?:\|[^>]+)?>", r"\1", body)
+body = re.sub(r"[CBI]<([^>]+)>", r"\1", body)
+body = re.sub(r"F<([^>]+)>", r"\1", body)
+paras = []
+for p in re.split(r"\n\s*\n", body):
+	p = re.sub(r"[ \t]+", " ", p.replace("\n", " ")).strip()
+	if not p:
+		continue
+	paras.append(p)
+	if len(paras) >= 3:
+		break
+if paras:
+	print("\n\n".join(paras))
+PY
+`
+		rm -f "$TMP.pod"
+	fi
+	rm -f "$TMP"
+fi
+
+# SS -- short summary (newlines killed)
+SS=`echo "$S" |xargs echo`
+[ -z "$DESC" ] && DESC="$S"
+if [ -n "$DESC" ]; then
+	DESC=`printf '%s\n' "$DESC" |fold -sw 76`
+fi
+[ -z "$L" ] && L="Perl (Artistic or GPL)"
+[ -z "$U" ] && U="https://metacpan.org/pod/$(echo $NAME |sed -e 's,-,::,g')"
+[ -z "$SRC" ] && SRC="https://cpan.metacpan.org/modules/by-module/$(echo $NAME |cut -d- -f1)/%{module}-%{version}.tar.gz"
+
+PNAME="perl-$NAME"
+mkdir -p "$ABFDIR/$PNAME"
+if [ ! -e "$ABFDIR/$PNAME/$PNAME.spec" ]; then
+	if $SNAPSHOT; then
+		cat >"$ABFDIR/$PNAME/$PNAME.spec" <<EOF
+%define beta %{nil}
+%define scmrev %{nil}
+
+EOF
+	fi
+	cat >>"$ABFDIR/$PNAME/$PNAME.spec" <<EOF
 %define module $NAME
 %undefine _debugsource_packages
 
 Name:		perl-%{module}
-Version:	
+Version:	$V
+EOF
+
+	if $SNAPSHOT; then
+		cat >>"$ABFDIR/$PNAME/$PNAME.spec" <<EOF
+%if "%{beta}" == ""
+%if "%{scmrev}" == ""
 Release:	1
-Summary:	
-URL:		https://metacpan.org/pod/$(echo $NAME |sed -e 's,-,::,g')
-Source:		https://cpan.org/modules/by-module/$(echo $NAME |cut -d- -f1)/%{module}-%{version}.tar.gz
-License:	Perl (Artistic or GPL)
+Source0:	%{module}-%{version}.tar.xz
+%else
+Release:	0.%{scmrev}.1
+Source0:	%{module}-%{scmrev}.tar.xz
+%endif
+%else
+%if "%{scmrev}" == ""
+Release:	0.%{beta}.1
+Source0:	%{module}-%{version}%{beta}.tar.xz
+%else
+Release:	0.%{beta}.0.%{scmrev}.1
+Source0:	%{module}-%{scmrev}.tar.xz
+%endif
+%endif
+EOF
+	else
+		cat >>"$ABFDIR/$PNAME/$PNAME.spec" <<EOF
+Release:	1
+Source0:	$SRC
+EOF
+	fi
+
+	cat >>"$ABFDIR/$PNAME/$PNAME.spec" <<EOF
+Summary:	$SS
+URL:		$U
+License:	$L
 Group:		Development/Perl
-BuildRequires:	perl
+BuildRequires:	make
+BuildRequires:	perl-devel
+BuildRequires:	perl(ExtUtils::MakeMaker)
+EOF
+	if [ -n "$DEPS" ]; then
+		printf '%s\n' "$DEPS" >>"$ABFDIR/$PNAME/$PNAME.spec"
+	fi
+	cat >>"$ABFDIR/$PNAME/$PNAME.spec" <<EOF
 BuildArch:	noarch
 
 %description
+$DESC
 
 %prep
 %autosetup -p1 -n %{module}-%{version}
-perl Makefile.PL INSTALLDIRS=vendor
 
 %build
+perl Makefile.PL INSTALLDIRS=vendor
 %make_build
 
 %check
 make test
 
 %install
-%make_install INSTALLDIRS=vendor
+%make_install
+find %{buildroot} -type f -name .packlist -delete
+find %{buildroot} -type f -name '*.bs' -empty -delete
+find %{buildroot} -type d -empty -delete
 
 %files
-%doc Changes MANIFEST README
-%{perl_vendorlib}/*/*
-%{_mandir}/man3/*.3pm*
+%doc Changes README
+%{perl_vendorlib}/*
+%{_mandir}/man3/*
 EOF
 fi
-exec $EDITOR perl-"$NAME".spec
+exec "$EDITOR" "$ABFDIR/$PNAME/$PNAME".spec

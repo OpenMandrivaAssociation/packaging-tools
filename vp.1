@@ -13,11 +13,14 @@ Create constructs to allow building an SCM snapshot
 \fBvp\fR ("vi python-specfile") is a simple generator for RPM spec files (the
 files controlling the build process of RPM packages) packaging python modules.
 .PP
-\fBvp\fR creates a spec file template, and invokes an editor (usually
-\fBvim\fR, but \fBvp\fR respects the \fBEDITOR\fR and \fBVISUAL\fR environment
-variables) to edit the file.
+\fBvp\fR looks the project up on PyPI and fills in version, summary,
+license and \fBBuildRequires\fR (\fBpython%{pyver}dist(...)\fR) from the
+published metadata, then invokes an editor (usually \fBvim\fR, but \fBvp\fR
+respects the \fBEDITOR\fR and \fBVISUAL\fR environment variables) to edit
+the file.
 .PP
-All you need to do is fill in the blanks and possibly overwrite some default
+Optional extras and Windows-only dependencies are omitted. All you need to
+do is review the generated fields and possibly overwrite some default
 settings.
 .PP
 If you are trying to package a (non-python) library, \fBvl (1)\fR is preferrable over

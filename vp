@@ -34,12 +34,63 @@ if cat /tmp/$NAME.$$ |grep -q '"message": "Not Found"'; then
 	set -x
 	curl https://pypi.org/pypi/$NAME/json >/tmp/$NAME.$$
 fi
+BRS=
 if [ -e /tmp/$NAME.$$ ]; then
 	V=`cat /tmp/$NAME.$$ |python -c "import sys,json; print(json.load(sys.stdin)['info']['version']);"`
 	S=`cat /tmp/$NAME.$$ |python -c "import sys,json; print(json.load(sys.stdin)['info']['summary']);"`
 	# SS -- short summary (newlines killed)
 	SS=`echo $S |xargs echo`
 	L=`cat /tmp/$NAME.$$ |python -c "import sys,json; print(json.load(sys.stdin)['info']['license']);"`
+	BRS=`python - /tmp/$NAME.$$ <<'PY'
+import json, re, sys
+
+REQ_RE = re.compile(
+	r"^\s*([A-Za-z0-9][A-Za-z0-9._-]*)"
+	r"(?:\[[^\]]*\])?"
+	r"\s*([^;]*?)"
+	r"(?:\s*;\s*(.*))?\s*$"
+)
+
+def normalize(name):
+	return re.sub(r"[-_.]+", "-", name).lower()
+
+def skip_marker(marker):
+	if not marker:
+		return False
+	ml = marker.lower()
+	if re.search(r"\bextra\s*==", ml):
+		return True
+	if re.search(r"sys_platform\s*==\s*['\"](win32|darwin|cygwin|emscripten|ios|android)['\"]", ml):
+		return True
+	if re.search(r"platform_system\s*==\s*['\"](windows|darwin)['\"]", ml):
+		return True
+	if re.search(r"os_name\s*==\s*['\"]nt['\"]", ml):
+		return True
+	m = re.search(r"python_version\s*<\s*['\"]3\.(\d+)['\"]", ml)
+	if m and int(m.group(1)) <= 13 and " or " not in ml:
+		return True
+	return False
+
+try:
+	info = json.load(open(sys.argv[1])).get("info") or {}
+except Exception:
+	sys.exit(0)
+
+seen = []
+for req in info.get("requires_dist") or []:
+	m = REQ_RE.match(req or "")
+	if not m:
+		continue
+	name = normalize(m.group(1))
+	if skip_marker((m.group(3) or "").strip()):
+		continue
+	if name and name not in seen:
+		seen.append(name)
+
+for name in seen:
+	print("BuildRequires:\tpython%%{pyver}dist(%s)" % name)
+PY
+`
 	rm -f /tmp/$NAME.$$
 fi
 [ -z "$L" ] && L="GPL"
@@ -90,9 +141,12 @@ Summary:	$SS
 URL:		https://pypi.org/project/$NAME/
 License:	$L
 Group:		Development/Python
-EOF
-	cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
 BuildRequires:	python
+EOF
+	if [ -n "$BRS" ]; then
+		printf '%s\n' "$BRS" >>$ABFDIR/$PNAME/$PNAME.spec
+	fi
+	cat >>$ABFDIR/$PNAME/$PNAME.spec <<EOF
 BuildSystem:	python
 BuildArch:	noarch
 
